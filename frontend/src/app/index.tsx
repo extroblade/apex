@@ -6,8 +6,28 @@ import { queryClient } from '@/shared/api/query-client';
 import { fetchAvailableLocales } from '@/shared/i18n';
 import { fetchViewer, viewerKeys } from '@/entities/viewer';
 import { fetchFeatures, featureKeys } from '@/entities/features';
+import { setCookie, deleteCookie } from '@/shared/lib/cookies';
 import '@/shared/i18n/config';
 import './styles/globals.css';
+
+// Cockpit dev-overlay: ?dev=KEY sets a developer cookie; ?dev=off clears it.
+// Runs before React mounts so the first render already sees the cookie.
+(function initDevCookie() {
+  const p = new URLSearchParams(window.location.search);
+  const dev = p.get('dev');
+  if (dev !== null) {
+    if (dev === 'off') {
+      deleteCookie('developer');
+    } else if (dev !== '') {
+      setCookie('developer', dev);
+    }
+    // Strip the param from the URL so it doesn't persist on refresh.
+    p.delete('dev');
+    const qs = p.toString();
+    const url = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+    window.history.replaceState(null, '', url);
+  }
+})();
 
 // Boot preloading: fire the requests every screen needs (session, feature
 // flags, locale manifest) before React renders, so the first paint already has

@@ -1,0 +1,80 @@
+name: e2e
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: playwright e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      # Bring up the full stack exactly like `./dev.sh up`, minus the scheduler
+      # (it only polls iRacing schedule PDFs and isn't exercised by any test).
+      # The backend auto-runs DB migrations + catalog seed on startup, so the
+      # planner endpoints work against a fresh MySQL with no extra step.
+      - name: create shared network
+        run: docker network create apex-net
+
+      - name: start backend (db + api)
+        run: docker compose -f backend/docker-compose.yml up -d --build db backend
+
+      - name: start static (avatars)
+        run: docker compose -f static/docker-compose.yml up -d --build
+
+      - name: start frontend
+        run: docker compose -f frontend/docker-compose.yml up -d --build
+
+      - name: wait for API
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/api/health >/dev/null 2>&1; then
+              echo "API is up"; exit 0
+            fi
+            echo "waiting for API... ($i/60)"
+            sleep 2
+          done
+          echo "::error::API did not become healthy in time"
+          docker compose -f backend/docker-compose.yml logs backend
+          exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: run e2e
+        working-directory: frontend
+        run: npm run e2e
+
+      - name: upload report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          retention-days: 14
+
+      - name: dump logs on failure
+        if: ${{ failure() }}
+        run: |
+          docker compose -f backend/docker-compose.yml logs backend || true
+          docker compose -f frontend/docker-compose.yml logs frontend || true

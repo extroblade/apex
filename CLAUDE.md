@@ -112,21 +112,44 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
   `prefers-reduced-motion` aware. Used on Home hero + Login.
 - Locales are exported to the static service (`frontend/scripts/gen-locales.mjs`
   → `static/locales/`); the language menu is manifest-driven.
+- **Catalog image rehosting** (`internal/contentsync/images.go`): the scheduler
+  downloads each catalog image once (per base name — configs share art) into the
+  shared **`apex-media-data`** volume and rewrites `image_path` to a relative
+  `/media/catalog/<table>/<file>`. The volume ROOT is the catalog dir:
+  `CATALOG_IMAGE_DIR=/media-data` in the scheduler; static mounts the same volume
+  at `/usr/share/nginx/html/catalog` (do NOT nest an extra `/catalog` in
+  `CATALOG_IMAGE_DIR` — it double-nests). The Dockerfile pre-creates
+  `/media-data/{cars,tracks}` owned by `nonroot` so the fresh volume is writable
+  (distroless runs as nonroot). Descriptions are backfilled from each detail page
+  (`detail_url`, migration 0020) — meta/og/first-`<p>`, capped to 1000 chars,
+  column widened to `VARCHAR(2000)` (migration 0022). Rehost + descriptions run
+  as their OWN DB-scanning steps every sync (image_path LIKE 'http%' /
+  description='' AND detail_url<>''), INDEPENDENT of the content-hash guard.
+- **Cockpit dev overlay** (`internal/handler/cockpit.go`, `features/cockpit`):
+  `?dev=KEY` sets a `developer` cookie (`?dev=off` clears it; handled in
+  `app/index.tsx`). Backend `DEVELOPER_KEY` env gates it — empty = all off.
+  `GET /api/features/all`, `PUT /api/features/{key}`, `GET /api/health/cockpit`
+  return 404 unless the cookie matches (cookie is the ONLY gate — no feature-flag
+  gate, that'd be chicken-and-egg). The `cockpit` flag (migration 0021, seeded
+  off) is just a normal togglable flag now. Frontend: floating wrench button
+  (visible only when `isDev()`) opens a Radix Dialog listing flags with toggles +
+  a health readout; `shared/lib/dev.ts` (`isDev`, `devlog` no-op without cookie).
+- **Redis cache** (`internal/cache`, `redis:7-alpine`, no external port): a
+  strictly **fail-open** go-redis v9 wrapper — nil client / downed Redis / miss
+  all fall through to MySQL with NO error surfaced, and every op has a 300ms
+  timeout + no retries so a dead Redis never stalls a request. Feature flags read
+  through it (30s TTL, key `features:flags`); the Cockpit toggle invalidates it.
+  `REDIS_ADDR` empty disables it. Catalog reads are NOT cached yet (roadmap).
 
 ## Roadmap / staged next (agreed with the user)
 
 Done recently: planner redesign (grid + this-week page + access colors), free/paid
 content model + track dedup, content sync (JSON list + iRacing web catalog),
-setups showroom, goal tracker, forms on zod + react-hook-form.
+setups showroom, goal tracker, forms on zod + react-hook-form, precise
+series→car mapping (`series_cars` in the seed), **catalog image rehosting +
+description backfill**, **Cockpit dev overlay**, **Redis cache (fail-open)**.
 
-1. Precise series→car mapping for the season grid ("can run" currently
-   approximates car eligibility by category).
-2. Re-host catalog images locally instead of hotlinking `s100.iracing.com`
-   (`image_path` currently stores the CDN URL); pull car/track descriptions from
-   the detail pages (only names/images/free are scraped from the index today).
-3. "Cockpit" dev overlay: runtime feature-flag/env overrides in a modal, gated
-   by a `developer` cookie; cookie also enables console logs (no-op in prod
-   without it).
-4. Redis cache service + fail-open `internal/cache` (features + catalog reads).
-5. Track layout art (generated SVGs in `static/`).
-6. Microfrontend split (module federation) — design first, don't ad-hoc it.
+1. Track layout art (generated SVGs in `static/`).
+2. Microfrontend split (module federation) — design first, don't ad-hoc it.
+3. Extend the Redis cache to catalog reads (cars/tracks/series). Today only the
+   feature flags go through `internal/cache`; catalog reads still hit MySQL.

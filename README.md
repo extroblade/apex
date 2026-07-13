@@ -1,51 +1,79 @@
-# full-stack-vc-app
+# Apex
 
-Full-stack starter.
+**Apex** is an iRacing companion app: fuel & stint calculator, season planner,
+garage, setups showroom, goal tracker, and driver stats. Go + MySQL backend,
+React + TypeScript frontend. Everything is Dockerized.
 
-- **Backend** — Go 1.23, [chi](https://github.com/go-chi/chi) router, `database/sql` + MySQL driver.
-- **Frontend** — React + TypeScript, built with [rsbuild](https://rsbuild.dev). Routing via [wouter](https://github.com/molefrog/wouter), client state via [zustand](https://zustand.docs.pmnd.rs), server state via [TanStack Query](https://tanstack.com/query), UI via [shadcn/ui](https://ui.shadcn.com) + Tailwind CSS v4 + clsx. Organized with [Feature-Sliced Design](https://feature-sliced.design).
+- **Backend** — Go 1.25, [chi](https://github.com/go-chi/chi) router, `database/sql` + MySQL driver. HTTP API + a daily schedule-sync scheduler.
+- **Frontend** — React + TypeScript, built with [rsbuild](https://rsbuild.dev). Routing via [wouter](https://github.com/molefrog/wouter), client state via [zustand](https://zustand.docs.pmnd.rs), server state via [TanStack Query](https://tanstack.com/query), UI via [shadcn/ui](https://ui.shadcn.com) + Tailwind CSS v4. Organized with [Feature-Sliced Design](https://feature-sliced.design).
+- **Static** — nginx serving generated default avatars, exported i18n locales, and rehosted catalog images (`/media/catalog/*`) from the shared `apex-media-data` volume the scheduler writes to.
 - **Database** — MySQL 8.4 (Dockerized).
-- **Docker** — every service containerized. The backend (`backend/docker-compose.yml`) and frontend (`frontend/docker-compose.yml`) are **separate compose projects** joined by a shared external network, so either can be split into its own repo later. `./dev.sh` runs both with one command.
+- **Cache** — Redis 7 (Dockerized, no external port). A strictly **fail-open** wrapper (`internal/cache`): if Redis is unset or down, reads fall through to MySQL with no error and no stall (300ms op timeout, no retries). Caches feature flags today.
+- **Docker** — the backend (`backend/docker-compose.yml`), frontend (`frontend/docker-compose.yml`), and static (`static/docker-compose.yml`) are **separate compose projects** joined by a shared external network, so each can be split into its own repo later. `./dev.sh` runs all three with one command.
 
 ## Layout
 
 ```
 .
 ├── backend/                  # Go API
-│   ├── cmd/server/           # main entrypoint
+│   ├── cmd/
+│   │   ├── server/           # API entrypoint
+│   │   └── scheduler/        # daily season-schedule PDF sync job
 │   ├── internal/
+│   │   ├── auth/             # session auth, profile
+│   │   ├── cache/            # fail-open Redis wrapper (feature-flag cache)
 │   │   ├── config/           # env-based config
+│   │   ├── contentsync/      # weekly catalog sync: JSON lists + iRacing web
+│   │   │                     # catalog + image rehost + description backfill
 │   │   ├── db/               # MySQL connection pool
-│   │   ├── handler/          # HTTP handlers (health, users)
-│   │   ├── middleware/       # CORS, etc.
-│   │   └── server/           # router wiring
-│   ├── migrations/           # *.sql, applied on first DB init
-│   └── Dockerfile
+│   │   ├── features/         # feature flags
+│   │   ├── fuel/             # fuel & stint strategy
+│   │   ├── goals/            # goal tracker
+│   │   ├── handler/          # HTTP handlers
+│   │   ├── iracing/          # iRacing OAuth + Data API client
+│   │   ├── middleware/       # CORS, auth
+│   │   ├── migrate/          # migration runner
+│   │   │   └── migrations/   # 0001_init.sql … append-only, applied on startup
+│   │   ├── racing/           # planner, catalog, free/paid access model
+│   │   ├── schedulepdf/      # season PDF parser
+│   │   ├── secretbox/        # AES-256-GCM encryption at rest
+│   │   ├── server/           # router wiring
+│   │   └── setups/           # setups showroom + baseline generator
+│   ├── scripts/              # gen-catalog-seed.py
+│   └── Dockerfile            # multi-binary: server + scheduler
 ├── frontend/                 # React SPA (FSD)
 │   ├── src/
 │   │   ├── app/              # init: providers, router, styles, entry
-│   │   ├── pages/            # home, about
-│   │   ├── widgets/          # header
-│   │   ├── features/         # (empty — add user interactions here)
-│   │   ├── entities/         # user (api + model)
-│   │   └── shared/           # ui (shadcn), lib (cn), api, config, store
+│   │   ├── pages/            # home, fuel, planner, this-week, garage, setups,
+│   │   │                     # goals, dashboard, drivers, driver-profile,
+│   │   │                     # compare, profile, login, about
+│   │   ├── widgets/          # header, bottom-nav, user-menu
+│   │   ├── features/         # auth, fuel-calculator, season-planner,
+│   │   │                     # manage-content, setups-manager, goal-tracker,
+│   │   │                     # link-iracing, profile, customize-theme
+│   │   ├── entities/         # viewer, planner, setups, goals, driver,
+│   │   │                     # iracing, features
+│   │   └── shared/           # ui (shadcn), lib (cn), api, config, i18n, theme
+│   ├── e2e/                  # Playwright specs
 │   ├── rsbuild.config.ts
 │   ├── nginx.conf            # prod: serves SPA, proxies /api → backend
 │   ├── docker-compose.yml    # frontend project
 │   └── Dockerfile
-├── backend/docker-compose.yml  # db + api project
-└── dev.sh                      # runs both projects together
+├── static/                   # nginx: avatars + exported locales
+├── dev.sh                    # runs all three projects together
+└── .github/workflows/        # CI/CD (backend-ci, frontend-ci, e2e)
 ```
 
 ## Run everything (Docker)
 
 ```bash
-./dev.sh up       # creates the shared network, builds & starts both projects
+./dev.sh up       # creates the shared network, builds & starts all three projects
 ./dev.sh down     # stop everything
 ./dev.sh logs     # tail all logs
+./dev.sh ps       # show running services
 ```
 
-The two stacks are separate compose projects on a shared external network
+The three stacks are separate compose projects on a shared external network
 (`apex-net`, auto-created by the script). Run one on its own if you like:
 
 ```bash
@@ -59,6 +87,23 @@ docker compose -f backend/docker-compose.yml up --build
 
 nginx in the frontend container proxies `/api/*` to the backend, so the SPA
 calls the API on its own origin — no CORS needed in production.
+
+## CI/CD
+
+GitHub Actions (in `.github/workflows/`) runs on every push to `main` and PR:
+
+| Workflow | What it does |
+| -------- | ------------ |
+| `backend-ci` | `gofmt`, `go vet`, `go test -race -cover`. On `main`/tags, builds & pushes `ghcr.io/<owner>/apex-backend`. |
+| `frontend-ci` | `tsc` typecheck, ESLint, Prettier check, Vitest, production build. On `main`/tags, builds & pushes `ghcr.io/<owner>/apex-frontend`. |
+| `e2e` | Brings up the full stack (MySQL + backend + static + frontend) via the existing compose files and runs the Playwright suite. Uploads the HTML report as an artifact. |
+
+Docker images are published to the **GitHub Container Registry (GHCR)** using the
+auto-provided `GITHUB_TOKEN` — no extra secrets required. Each image is tagged
+`latest` (on `main`), the short commit SHA, and the semver on `v*` tags.
+
+Recommended branch-protection **required checks**: `backend-ci`, `frontend-ci`,
+`e2e`.
 
 ## Local development
 
@@ -85,7 +130,11 @@ Tip: `docker compose up db` to run just MySQL while developing the apps natively
 | Method | Path                  | Auth | Description                          |
 | ------ | --------------------- | ---- | ------------------------------------ |
 | GET    | `/api/health`         | —    | Liveness + DB connectivity           |
+| GET    | `/api/features`       | —    | Public feature-flag map              |
 | POST   | `/api/fuel/plan`      | —    | Compute a fuel & stint strategy      |
+| GET    | `/api/features/all`   | dev cookie | Cockpit: all flags (404 unless `developer` cookie = `DEVELOPER_KEY`) |
+| PUT    | `/api/features/{key}` | dev cookie | Cockpit: toggle a flag (`{"enabled":bool}`) |
+| GET    | `/api/health/cockpit` | dev cookie | Cockpit: DB + Redis health readout   |
 | POST   | `/api/auth/register`  | —    | Create an account (auto-logs in)     |
 | POST   | `/api/auth/login`     | —    | Log in, sets `session` cookie        |
 | POST   | `/api/auth/logout`    | cookie | Log out, clears the session        |
@@ -118,6 +167,16 @@ register an OAuth client with iRacing and set `APP_ENCRYPTION_KEY` (base64 32
 bytes), `IRACING_CLIENT_ID`, `IRACING_OAUTH_REDIRECT_URI` (and
 `IRACING_CLIENT_SECRET` if issued). Without these, the `/api/iracing`,
 `/api/drivers`, `/api/compare`, and `/api/planner` routes return 503.
+
+**Cockpit dev overlay** — open any page with `?dev=<DEVELOPER_KEY>` to store a
+`developer` cookie (`?dev=off` clears it). When it matches the backend
+`DEVELOPER_KEY` env, a floating wrench button opens a modal to toggle feature
+flags at runtime and view backend health. All cockpit endpoints 404 without the
+matching cookie; leave `DEVELOPER_KEY` empty to disable it entirely.
+
+Other env: `REDIS_ADDR` (e.g. `redis:6379`; empty = cache disabled, fail-open)
+and `CATALOG_IMAGE_DIR` (scheduler; the shared media-volume root, `/media-data`
+in Docker) — see `backend/.env.example`.
 
 ### Phases
 

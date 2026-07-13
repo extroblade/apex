@@ -26,6 +26,20 @@ services:
     networks:
       - apex-net
 
+  # Fail-open cache shared by the API. No external port — only reachable inside
+  # apex-net. If it goes down the app keeps working (reads fall through to MySQL).
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - apex-net
+
   backend:
     build: .
     restart: unless-stopped
@@ -37,6 +51,11 @@ services:
       DB_PASSWORD: app
       DB_NAME: app
       CORS_ORIGIN: "*"
+      # Redis cache (fail-open). Point at the redis service; unset to disable.
+      REDIS_ADDR: "redis:6379"
+      # Cockpit dev-overlay key. Set to enable runtime flag toggles; the frontend
+      # opts in with ?dev=<key>. Empty disables Cockpit entirely.
+      DEVELOPER_KEY: "${DEVELOPER_KEY:-}"
       # Dev-only key so the iRacing integration is enabled out of the box.
       # Generate your own for anything real: head -c 32 /dev/urandom | base64
       APP_ENCRYPTION_KEY: "BBaagx7zSXl/MbrekQWYgNPMOQhTsNt7IvRsSIUvctA="
@@ -49,11 +68,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - apex-net
 
   # Daily season-schedule sync: probes iRacing PDF URLs and scans ./schedules
-  # for manually downloaded PDFs, parsing new ones into season_schedule.
+  # for manually downloaded PDFs, parsing new ones into season_schedule. Also
+  # rehosts catalog images into the shared media volume and fills descriptions.
   scheduler:
     build: .
     entrypoint: ["/app/scheduler"]
@@ -65,10 +87,16 @@ services:
       DB_PASSWORD: app
       DB_NAME: app
       SCHEDULE_PDF_DIR: /schedules
+      # The shared media volume is mounted here at /media-data and, in the static
+      # service, at /usr/share/nginx/html/catalog — so the volume root IS the
+      # "catalog" dir. Images go to <root>/cars|tracks and are served at
+      # /media/catalog/... (do NOT add a nested /catalog here — that double-nests).
+      CATALOG_IMAGE_DIR: /media-data
       # SCHEDULE_PDF_URLS: comma-separated extra URLs to probe
       # SCHEDULE_CHECK_INTERVAL: e.g. 1h (default 24h)
     volumes:
       - ./schedules:/schedules:ro
+      - media-data:/media-data
     depends_on:
       db:
         condition: service_healthy
@@ -83,6 +111,10 @@ volumes:
     # can't silently create a fresh empty volume. dev.sh migrates the old
     # vcapp-backend_db_data contents into this one on first run.
     name: apex-db-data
+  media-data:
+    # Shared with the static service so rehosted catalog images are served
+    # under /media/catalog/* by the frontend nginx proxy.
+    name: apex-media-data
 
 networks:
   apex-net:

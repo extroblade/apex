@@ -14,24 +14,32 @@ const (
 )
 
 // The iRacing web catalog renders one card per car / base track as:
-//   <div data-name="…" data-order="N" data-type="free|paid" …> … <img src="…"> …
+//   <div data-name="…" data-order="N" data-type="free|paid"
+//        onclick="document.location='https://www.iracing.com/cars/<slug>/';">
+//     … <img src="…"> …
 // We enrich our catalog from it: `data-type` is the authoritative free/included
-// flag, and the card image is the artwork the app displays. Cards are keyed by
-// name (there are no ids in the markup), so we match to the catalog by name.
+// flag, the card image is the artwork the app displays, and the onclick target
+// is the detail page (used later to fill missing descriptions). Cards are keyed
+// by name (there are no ids in the markup), so we match to the catalog by name.
 var (
 	cardRe = regexp.MustCompile(`data-name="([^"]+)"[^>]*?data-type="(free|paid)"`)
 	imgRe  = regexp.MustCompile(`<img[^>]+src="([^"]+)"`)
+	// onclick="javascript: document.location = 'https://…/cars/<slug>/';"
+	detailRe = regexp.MustCompile(`document\.location\s*=\s*'([^']+)'`)
 	// A WordPress resize suffix like -1024x576 before the extension.
 	sizeSuffixRe = regexp.MustCompile(`-\d+x\d+(\.(?:jpg|jpeg|png|webp))$`)
 )
 
 type webItem struct {
-	name  string
-	free  bool
-	image string
+	name      string
+	free      bool
+	image     string
+	detailURL string
 }
 
-// parseCatalogCards pulls {name, free, image} from an iRacing cars/tracks page.
+// parseCatalogCards pulls {name, free, image, detailURL} from an iRacing
+// cars/tracks page. The slice is bounded by each card to its next sibling so an
+// image/detail URL can't leak across cards.
 func parseCatalogCards(htmlDoc string) []webItem {
 	locs := cardRe.FindAllStringSubmatchIndex(htmlDoc, -1)
 	items := make([]webItem, 0, len(locs))
@@ -42,11 +50,16 @@ func parseCatalogCards(htmlDoc string) []webItem {
 		if i+1 < len(locs) {
 			end = locs[i+1][0]
 		}
+		body := htmlDoc[loc[1]:end]
 		image := ""
-		if m := imgRe.FindStringSubmatch(htmlDoc[loc[1]:end]); m != nil {
+		if m := imgRe.FindStringSubmatch(body); m != nil {
 			image = fullSizeImage(m[1])
 		}
-		items = append(items, webItem{name: htmlUnescape(name), free: free, image: image})
+		detail := ""
+		if m := detailRe.FindStringSubmatch(body); m != nil {
+			detail = m[1]
+		}
+		items = append(items, webItem{name: htmlUnescape(name), free: free, image: image, detailURL: detail})
 	}
 	return items
 }
@@ -93,9 +106,13 @@ func (s *Syncer) syncWebCatalog(ctx context.Context, url, table, nameCol string)
 			continue
 		}
 		// Update every row sharing the name (a track's configs share track_name).
+		// Each field is set only when the card supplied it, so an empty card image
+		// never clobbers an existing (or rehosted) image_path.
 		if _, err := tx.ExecContext(ctx,
-			"UPDATE "+table+" SET is_free = ?, image_path = IF(? = '', image_path, ?) WHERE "+nameCol+" = ?",
-			it.free, it.image, it.image, name); err != nil {
+			"UPDATE "+table+
+				" SET is_free = ?, image_path = IF(? = '', image_path, ?),"+
+				" detail_url = IF(? = '', detail_url, ?) WHERE "+nameCol+" = ?",
+			it.free, it.image, it.image, it.detailURL, it.detailURL, name); err != nil {
 			return err
 		}
 		matched++

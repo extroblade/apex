@@ -233,6 +233,20 @@ export const en = {
     iracingSignedOut: 'Sign in, then link your iRacing account.',
     goToDashboard: 'Go to dashboard',
   },
+  cockpit: {
+    open: 'Open developer cockpit',
+    title: 'Cockpit',
+    description: 'Runtime feature flags and backend health. Developer only.',
+    flags: 'Feature flags',
+    health: 'Backend health',
+    db: 'Database',
+    redis: 'Redis cache',
+    up: 'Up',
+    down: 'Down',
+    unknown: 'Unknown',
+    disabled: 'Disabled',
+    error: 'Failed to load flags.',
+  },
 };
 
 export type Translation = typeof en;

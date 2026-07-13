@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"apex/internal/auth"
+	"apex/internal/cache"
 	"apex/internal/features"
 	"apex/internal/goals"
 	"apex/internal/racing"
@@ -20,7 +21,9 @@ type Handler struct {
 	Features     *features.Service
 	Setups       *setups.Service
 	Goals        *goals.Service
+	Cache        *cache.Cache // optional; nil-safe (fail-open)
 	CookieSecure bool
+	DeveloperKey string
 }
 
 func New(db *sql.DB, authSvc *auth.Service) *Handler {

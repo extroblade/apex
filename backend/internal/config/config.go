@@ -27,6 +27,13 @@ type Config struct {
 	IRacingClientID     string
 	IRacingClientSecret string
 	IRacingRedirectURI  string
+	// DeveloperKey activates the Cockpit dev-overlay when non-empty. The frontend
+	// sets a "developer" cookie matching this key; only matching requests see the
+	// all-features list and the toggle endpoint. Empty disables Cockpit entirely.
+	DeveloperKey string
+	// RedisAddr is the host:port of the Redis cache (e.g. "redis:6379"). Empty
+	// disables caching — the app reads straight from the DB (fail-open).
+	RedisAddr string
 }
 
 // Load reads configuration from the environment, applying sensible defaults.
@@ -43,8 +50,10 @@ func Load() *Config {
 		EncryptionKey:       env("APP_ENCRYPTION_KEY", ""),
 		IRacingClientID:     env("IRACING_CLIENT_ID", ""),
 		IRacingClientSecret: env("IRACING_CLIENT_SECRET", ""),
-		IRacingRedirectURI:  env("IRACING_OAUTH_REDIRECT_URI", ""),
-	}
+			IRacingRedirectURI:  env("IRACING_OAUTH_REDIRECT_URI", ""),
+			DeveloperKey:       env("DEVELOPER_KEY", ""),
+			RedisAddr:          env("REDIS_ADDR", ""),
+		}
 }
 
 // DSN builds the MySQL data source name.

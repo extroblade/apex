@@ -2,12 +2,14 @@ package contentsync
 
 import "testing"
 
-// A trimmed-down version of the real iRacing cars-page markup.
+// A trimmed-down version of the real iRacing cars-page markup: each card is a
+// div with data-name/data-type, an onclick pointing at its detail page, and an
+// img (a WordPress thumbnail URL).
 const sampleCards = `
-<div data-name="Next Gen NASCAR Cup Series Chevrolet Camaro ZL1" data-order="0" data-type="paid" data-timestamp="1620161122" class="grid-item">
+<div data-name="Next Gen NASCAR Cup Series Chevrolet Camaro ZL1" data-order="0" data-type="paid" data-timestamp="1620161122" class="grid-item" onclick="javascript: document.location = 'https://www.iracing.com/cars/next-gen-nascar-cup-series-chevrolet-camaro/';">
   <div class="thumbnail"><a href="x"><img src="https://s100.iracing.com/wp-content/uploads/2021/05/nascar-nextgen-camaro-feature-1024x576.jpg" class="wp-post-image" /></a></div>
 </div>
-<div data-name="Global Mazda MX-5 Cup" data-order="1" data-type="free" data-timestamp="1620161122" class="grid-item">
+<div data-name="Global Mazda MX-5 Cup" data-order="1" data-type="free" data-timestamp="1620161122" class="grid-item" onclick="javascript: document.location = 'https://www.iracing.com/cars/global-mazda-mx-5-cup/';">
   <div class="thumbnail"><a href="x"><img src="https://s100.iracing.com/wp-content/uploads/2021/05/mx5-feature-350x197.jpg" class="wp-post-image" /></a></div>
 </div>`
 
@@ -25,6 +27,10 @@ func TestParseCatalogCards(t *testing.T) {
 	}
 	if items[1].name != "Global Mazda MX-5 Cup" {
 		t.Fatalf("name wrong: %q", items[1].name)
+	}
+	// Detail URL pulled from the card's onclick.
+	if items[0].detailURL != "https://www.iracing.com/cars/next-gen-nascar-cup-series-chevrolet-camaro/" {
+		t.Fatalf("detail url wrong: %q", items[0].detailURL)
 	}
 }
 

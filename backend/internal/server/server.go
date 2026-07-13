@@ -9,6 +9,7 @@ import (
 	chimw "github.com/go-chi/chi/v5/middleware"
 
 	"apex/internal/auth"
+	"apex/internal/cache"
 	"apex/internal/config"
 	"apex/internal/features"
 	"apex/internal/handler"
@@ -26,7 +27,10 @@ const iracingFlag = "iracing_oauth"
 // New builds the application's HTTP router with all routes and middleware.
 func New(cfg *config.Config, db *sql.DB) http.Handler {
 	authSvc := auth.NewService(db)
-	featuresSvc := features.NewService(db)
+	// Redis cache is fail-open: an empty REDIS_ADDR (or a downed Redis) just
+	// means every read falls through to the DB.
+	redisCache := cache.New(cfg.RedisAddr)
+	featuresSvc := features.NewService(db).WithCache(redisCache)
 
 	h := handler.New(db, authSvc)
 	h.CookieSecure = cfg.CookieSecure
@@ -34,6 +38,8 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 	h.Features = featuresSvc
 	h.Setups = setups.New(db)
 	h.Goals = goals.New(db)
+	h.Cache = redisCache
+	h.DeveloperKey = cfg.DeveloperKey
 
 	// requireIRacing 404s OAuth-dependent routes when the feature flag is off.
 	requireIRacing := requireFeature(featuresSvc, iracingFlag)
@@ -48,8 +54,16 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/health", h.Health)
-		r.Get("/features", h.ListFeatures)
-		r.Post("/fuel/plan", h.FuelPlan)
+			r.Get("/features", h.ListFeatures)
+			r.Post("/fuel/plan", h.FuelPlan)
+
+			// Cockpit dev-overlay: gated by the developer cookie matching
+			// DEVELOPER_KEY (each handler calls devAuth → 404 otherwise). No
+			// feature-flag gate here — that would be a chicken-and-egg, since the
+			// toggle endpoint is how you'd flip flags in the first place.
+			r.Get("/features/all", h.AllFeatures)
+			r.Put("/features/{key}", h.ToggleFeature)
+			r.Get("/health/cockpit", h.HealthCockpit)
 
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/register", h.Register)

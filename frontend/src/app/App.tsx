@@ -2,6 +2,7 @@ import { AppProviders } from './providers';
 import { AppRouter } from './providers/router';
 import { Header } from '@/widgets/header';
 import { BottomNav } from '@/widgets/bottom-nav';
+import { Cockpit } from '@/features/cockpit';
 
 export function App() {
   return (
@@ -19,6 +20,8 @@ export function App() {
           <AppRouter />
         </main>
         <BottomNav />
+        {/* Dev-only overlay; renders nothing without the `developer` cookie. */}
+        <Cockpit />
       </div>
     </AppProviders>
   );

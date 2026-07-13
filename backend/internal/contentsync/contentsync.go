@@ -79,6 +79,15 @@ func (s *Syncer) Run(ctx context.Context) {
 	if err := s.syncWebCatalog(ctx, urlOr("CONTENT_TRACKS_HTML_URL", defaultTracksHTMLURL), "tracks", "track_name"); err != nil {
 		log.Printf("contentsync: web tracks: %v", err)
 	}
+	// Rehost images + fill descriptions run on EVERY sync (not hash-guarded):
+	// they scan the DB for the remaining gap, so they catch up even when the
+	// catalog pages themselves were unchanged.
+	if err := s.rehostImages(ctx); err != nil {
+		log.Printf("contentsync: rehost: %v", err)
+	}
+	if err := s.fillDescriptions(ctx); err != nil {
+		log.Printf("contentsync: descriptions: %v", err)
+	}
 }
 
 func (s *Syncer) fetch(ctx context.Context, url string) (data []byte, hash string, fresh bool, err error) {

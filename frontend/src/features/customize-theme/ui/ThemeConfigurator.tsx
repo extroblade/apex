@@ -80,7 +80,11 @@ export function ThemeConfigurator() {
 
         <div className="space-y-1.5">
           <Label>{t('themeConfig.font')}</Label>
-          <div className="flex flex-wrap gap-2" role="group" aria-label={t('themeConfig.font')}>
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label={t('themeConfig.font')}
+          >
             {FONTS.map((f) => (
               <Button
                 key={f}

@@ -75,7 +75,11 @@ export function BottomNav() {
         <div className="border-b">
           <div className="mx-auto grid max-w-md grid-cols-4 gap-1 p-2">
             {overflow.map((item) => (
-              <BarLink key={item.href} item={item} onNavigate={() => setMoreOpen(false)} />
+              <BarLink
+                key={item.href}
+                item={item}
+                onNavigate={() => setMoreOpen(false)}
+              />
             ))}
           </div>
         </div>

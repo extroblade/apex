@@ -2,11 +2,11 @@
 // (members-ng.iracing.com).
 //
 // Two things about that API shape the design:
-//   1. Auth is OAuth 2.x (see oauth.go). A Client carries an access token and
-//      sends it as `Authorization: Bearer`. (iRacing removed the old
-//      email/password auth on 2025-12-09.)
-//   2. Data endpoints don't return the payload directly — they return a small
-//      JSON envelope with a signed link to the real JSON on S3. We follow it.
+//  1. Auth is OAuth 2.x (see oauth.go). A Client carries an access token and
+//     sends it as `Authorization: Bearer`. (iRacing removed the old
+//     email/password auth on 2025-12-09.)
+//  2. Data endpoints don't return the payload directly — they return a small
+//     JSON envelope with a signed link to the real JSON on S3. We follow it.
 //
 // NOTE: exact JSON field names below are per iRacing's published API. They
 // should be re-verified against a live response when credentials are available;

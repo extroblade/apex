@@ -21,7 +21,10 @@ function Calendar({ className, classNames, ...props }: DayPickerProps) {
         ...defaults,
         root: cn(defaults.root, 'text-sm'),
         months: cn(defaults.months, 'relative'),
-        month_caption: cn(defaults.month_caption, 'flex h-8 items-center px-2 font-medium'),
+        month_caption: cn(
+          defaults.month_caption,
+          'flex h-8 items-center px-2 font-medium',
+        ),
         nav: cn(defaults.nav, 'absolute right-0 top-0 flex gap-1'),
         button_previous: cn(
           defaults.button_previous,
@@ -36,7 +39,8 @@ function Calendar({ className, classNames, ...props }: DayPickerProps) {
         day: 'p-0 text-center',
         day_button:
           'inline-flex size-9 cursor-pointer items-center justify-center rounded-md hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        selected: 'rounded-md bg-primary text-primary-foreground hover:[&>button]:bg-primary',
+        selected:
+          'rounded-md bg-primary text-primary-foreground hover:[&>button]:bg-primary',
         today: 'font-semibold text-primary',
         outside: 'text-muted-foreground/50',
         disabled: 'text-muted-foreground/40',

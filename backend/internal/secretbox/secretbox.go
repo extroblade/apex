@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	ErrKeySize   = errors.New("secretbox: key must decode to 32 bytes")
+	ErrKeySize    = errors.New("secretbox: key must decode to 32 bytes")
 	ErrCiphertext = errors.New("secretbox: ciphertext too short or malformed")
 )
 

@@ -42,7 +42,11 @@ export function DatePicker({
   const selected = value ? parseISODate(value) : undefined;
 
   const label = selected
-    ? selected.toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' })
+    ? selected.toLocaleDateString(i18n.language, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
     : (placeholder ?? t('common.pickDate'));
 
   return (

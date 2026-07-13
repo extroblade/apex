@@ -33,8 +33,8 @@ func main() {
 	waitForSchema(database)
 
 	ingestor := &schedulepdf.Ingestor{
-		DB:   database,
-		HTTP: &http.Client{Timeout: 60 * time.Second},
+		DB:       database,
+		HTTP:     &http.Client{Timeout: 60 * time.Second},
 		URLs:     splitList(os.Getenv("SCHEDULE_PDF_URLS")),
 		Dir:      os.Getenv("SCHEDULE_PDF_DIR"),
 		ImageDir: os.Getenv("SCHEDULE_IMAGE_DIR"),

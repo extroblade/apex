@@ -17,10 +17,10 @@ const defaultSeriesURL = "https://raw.githubusercontent.com/adrianulima/my-racin
 const seasonWeeks = 13
 
 type seriesEntry struct {
-	ID       int      `json:"id"`
-	Name     string   `json:"name"`
-	Category string   `json:"category"`
-	Cars     []int    `json:"cars"`
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Category string `json:"category"`
+	Cars     []int  `json:"cars"`
 	License  struct {
 		Letter string `json:"letter"`
 	} `json:"license"`

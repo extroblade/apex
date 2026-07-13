@@ -27,8 +27,10 @@ func testBox(t *testing.T) *secretbox.Box {
 // fakeClient implements APIClient with no network.
 type fakeClient struct{ tokenSet string }
 
-func (f *fakeClient) SetToken(t string)                            { f.tokenSet = t }
-func (f *fakeClient) Info(context.Context) (iracing.Member, error) { return iracing.Member{CustID: 1}, nil }
+func (f *fakeClient) SetToken(t string) { f.tokenSet = t }
+func (f *fakeClient) Info(context.Context) (iracing.Member, error) {
+	return iracing.Member{CustID: 1}, nil
+}
 func (f *fakeClient) Member(_ context.Context, id int) (iracing.Member, error) {
 	return iracing.Member{CustID: id}, nil
 }

@@ -1,0 +1,14 @@
+# Normalize line endings: the repo stores LF and every platform checks out LF
+# for text/code. This keeps gofmt and prettier --check green on the Linux CI
+# runners regardless of the OS a contributor commits from.
+* text=auto eol=lf
+
+# Binary assets — never touch their bytes.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.woff  binary
+*.woff2 binary

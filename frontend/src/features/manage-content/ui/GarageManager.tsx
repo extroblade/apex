@@ -79,7 +79,12 @@ function TracksPanel() {
   const { rows, configsByGroup } = useMemo(() => {
     const groups = new Map<
       string,
-      { rep: TrackItem; configs: number[]; layouts: { name: string; free?: boolean }[]; owned: boolean }
+      {
+        rep: TrackItem;
+        configs: number[];
+        layouts: { name: string; free?: boolean }[];
+        owned: boolean;
+      }
     >();
     for (const t of tracks.data ?? []) {
       const g = groups.get(t.trackName);
@@ -165,7 +170,9 @@ function SyncCard() {
           </span>
         )}
         {sync.error && (
-          <span className="text-sm text-destructive">{(sync.error as Error).message}</span>
+          <span className="text-sm text-destructive">
+            {(sync.error as Error).message}
+          </span>
         )}
       </CardContent>
     </Card>

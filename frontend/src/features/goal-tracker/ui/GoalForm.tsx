@@ -58,7 +58,9 @@ export function GoalForm({ onCreated }: { onCreated?: () => void }) {
           aria-invalid={!!errors.title}
           {...register('title')}
         />
-        {errors.title && <p className="text-sm text-destructive">{t(errors.title.message ?? '')}</p>}
+        {errors.title && (
+          <p className="text-sm text-destructive">{t(errors.title.message ?? '')}</p>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -86,7 +88,11 @@ export function GoalForm({ onCreated }: { onCreated?: () => void }) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="goal-unit">{t('goals.unit')}</Label>
-          <Input id="goal-unit" placeholder={t('goals.unitPlaceholder')} {...register('unit')} />
+          <Input
+            id="goal-unit"
+            placeholder={t('goals.unitPlaceholder')}
+            {...register('unit')}
+          />
         </div>
       </div>
 

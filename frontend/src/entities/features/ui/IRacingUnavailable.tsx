@@ -16,8 +16,8 @@ export function IRacingUnavailable() {
       <CardHeader>
         <CardTitle>iRacing features are unavailable</CardTitle>
         <CardDescription>
-          iRacing account linking is currently turned off. You can still plan races
-          using the Planner and Garage.
+          iRacing account linking is currently turned off. You can still plan races using
+          the Planner and Garage.
         </CardDescription>
       </CardHeader>
       <CardContent>

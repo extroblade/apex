@@ -142,7 +142,8 @@ export const en = {
   },
   planner: {
     title: 'Race Planner',
-    subtitle: "The season at a glance — each series' weekly tracks, with what you own highlighted.",
+    subtitle:
+      "The season at a glance — each series' weekly tracks, with what you own highlighted.",
     favoritesOnly: 'Favorites',
     allSeries: 'All series',
     thisWeek: 'This week',
@@ -150,7 +151,8 @@ export const en = {
     canRun: '{{n}}/{{total}} weeks',
     canRunHint: 'weeks you own the track for',
     noCar: 'no car owned for this class',
-    noFavorites: 'No favorite series yet — star some in the garage, or switch to All series.',
+    noFavorites:
+      'No favorite series yet — star some in the garage, or switch to All series.',
     empty: 'No season schedule available.',
     legendFree: 'included (free)',
     legendOwned: 'you own it (bought)',
@@ -171,7 +173,8 @@ export const en = {
     showroom: 'Showroom',
     mine: 'My setups',
     add: 'Add setup',
-    addHint: 'Paste an exported setup or its key values; add notes so others know what it is for.',
+    addHint:
+      'Paste an exported setup or its key values; add notes so others know what it is for.',
     empty: 'No setups yet.',
     name: 'Name',
     car: 'Car',

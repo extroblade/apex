@@ -14,9 +14,11 @@ const (
 )
 
 // The iRacing web catalog renders one card per car / base track as:
-//   <div data-name="…" data-order="N" data-type="free|paid"
-//        onclick="document.location='https://www.iracing.com/cars/<slug>/';">
-//     … <img src="…"> …
+//
+//	<div data-name="…" data-order="N" data-type="free|paid"
+//	     onclick="document.location='https://www.iracing.com/cars/<slug>/';">
+//	  … <img src="…"> …
+//
 // We enrich our catalog from it: `data-type` is the authoritative free/included
 // flag, the card image is the artwork the app displays, and the onclick target
 // is the detail page (used later to fill missing descriptions). Cards are keyed

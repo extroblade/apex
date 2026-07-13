@@ -13,7 +13,6 @@ export function isDev(): string | undefined {
  */
 export function devlog(...args: unknown[]): void {
   if (getCookie(DEV_COOKIE)) {
-    // eslint-disable-next-line no-console
     console.log(...args);
   }
 }

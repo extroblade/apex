@@ -19,16 +19,16 @@ type Generated struct {
 
 // baseline carries the tunable ranges for one discipline.
 type baseline struct {
-	tirePsi        float64 // cold pressure baseline, psi
-	wingFront      int     // percent (formula/sports) — ovals use tape instead
-	wingRear       int
-	rideHeightMM   int
-	springN        int // spring rate, N/mm
-	arbFront       int // anti-roll bar setting 1..10
-	arbRear        int
-	brakeBias      float64 // % front
-	diffPreloadNm  int
-	notes          string
+	tirePsi       float64 // cold pressure baseline, psi
+	wingFront     int     // percent (formula/sports) — ovals use tape instead
+	wingRear      int
+	rideHeightMM  int
+	springN       int // spring rate, N/mm
+	arbFront      int // anti-roll bar setting 1..10
+	arbRear       int
+	brakeBias     float64 // % front
+	diffPreloadNm int
+	notes         string
 }
 
 var baselines = map[string]baseline{

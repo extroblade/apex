@@ -1,4 +1,12 @@
-import { Car, Gauge, Flag, Mountain, Trees, CircleDot, type LucideIcon } from 'lucide-react';
+import {
+  Car,
+  Gauge,
+  Flag,
+  Mountain,
+  Trees,
+  CircleDot,
+  type LucideIcon,
+} from 'lucide-react';
 
 export interface CategoryMeta {
   label: string;

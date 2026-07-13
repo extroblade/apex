@@ -44,7 +44,11 @@ export function GoalsPage() {
           <h1 className="text-2xl font-semibold">{t('goals.title')}</h1>
           <p className="text-sm text-muted-foreground">{t('goals.subtitle')}</p>
         </div>
-        <Button size="sm" variant={creating ? 'outline' : 'default'} onClick={() => setCreating((v) => !v)}>
+        <Button
+          size="sm"
+          variant={creating ? 'outline' : 'default'}
+          onClick={() => setCreating((v) => !v)}
+        >
           {creating ? <X className="size-4" /> : <Plus className="size-4" />}
           {creating ? t('common.cancel') : t('goals.add')}
         </Button>

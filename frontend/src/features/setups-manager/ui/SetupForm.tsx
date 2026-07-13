@@ -90,7 +90,9 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
       <div className="space-y-1.5">
         <Label htmlFor="setup-name">{t('setups.name')}</Label>
         <Input id="setup-name" aria-invalid={!!errors.name} {...register('name')} />
-        {errors.name && <p className="text-sm text-destructive">{t(errors.name.message ?? '')}</p>}
+        {errors.name && (
+          <p className="text-sm text-destructive">{t(errors.name.message ?? '')}</p>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -117,7 +119,9 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
               </Select>
             )}
           />
-          {errors.carId && <p className="text-sm text-destructive">{t(errors.carId.message ?? '')}</p>}
+          {errors.carId && (
+            <p className="text-sm text-destructive">{t(errors.carId.message ?? '')}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -149,8 +153,15 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
 
       <div className="space-y-1.5">
         <Label htmlFor="setup-notes">{t('setups.notes')}</Label>
-        <Textarea id="setup-notes" rows={2} aria-invalid={!!errors.notes} {...register('notes')} />
-        {errors.notes && <p className="text-sm text-destructive">{t(errors.notes.message ?? '')}</p>}
+        <Textarea
+          id="setup-notes"
+          rows={2}
+          aria-invalid={!!errors.notes}
+          {...register('notes')}
+        />
+        {errors.notes && (
+          <p className="text-sm text-destructive">{t(errors.notes.message ?? '')}</p>
+        )}
       </div>
 
       <div className="space-y-1.5">
@@ -163,11 +174,17 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
           aria-invalid={!!errors.data}
           {...register('data')}
         />
-        {errors.data && <p className="text-sm text-destructive">{t(errors.data.message ?? '')}</p>}
+        {errors.data && (
+          <p className="text-sm text-destructive">{t(errors.data.message ?? '')}</p>
+        )}
       </div>
 
       <label className="flex cursor-pointer items-center gap-2 text-sm">
-        <input type="checkbox" className="size-4 cursor-pointer" {...register('public')} />
+        <input
+          type="checkbox"
+          className="size-4 cursor-pointer"
+          {...register('public')}
+        />
         {t('setups.makePublic')}
       </label>
 

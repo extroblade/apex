@@ -53,7 +53,9 @@ export function AuthForm() {
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
-        <CardTitle>{mode === 'login' ? t('auth.logInTitle') : t('auth.signUpTitle')}</CardTitle>
+        <CardTitle>
+          {mode === 'login' ? t('auth.logInTitle') : t('auth.signUpTitle')}
+        </CardTitle>
         <CardDescription>
           {mode === 'login' ? t('auth.welcomeBack') : t('auth.startPlanning')}
         </CardDescription>
@@ -83,7 +85,9 @@ export function AuthForm() {
               {...field('password')}
             />
             {errors.password && (
-              <p className="text-sm text-destructive">{t(errors.password.message ?? '')}</p>
+              <p className="text-sm text-destructive">
+                {t(errors.password.message ?? '')}
+              </p>
             )}
           </div>
 

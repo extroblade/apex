@@ -26,10 +26,7 @@ export function ProfileSettings() {
 
   return (
     <div className="space-y-6">
-      <AvatarCard
-        avatarUrl={viewer.avatarUrl}
-        label={viewer.nickname || viewer.email}
-      />
+      <AvatarCard avatarUrl={viewer.avatarUrl} label={viewer.nickname || viewer.email} />
       <AccountCard nickname={viewer.nickname} email={viewer.email} />
       <PasswordCard />
       <span className="sr-only">{t('profile.title')}</span>

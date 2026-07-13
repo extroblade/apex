@@ -23,7 +23,12 @@ export function HomePage() {
 
   const features: { href: string; title: string; desc: string; Icon: LucideIcon }[] = [
     { href: '/fuel', title: t('home.fuelTitle'), desc: t('home.fuelDesc'), Icon: Fuel },
-    { href: '/planner', title: t('nav.planner'), desc: t('home.plannerDesc'), Icon: CalendarRange },
+    {
+      href: '/planner',
+      title: t('nav.planner'),
+      desc: t('home.plannerDesc'),
+      Icon: CalendarRange,
+    },
     { href: '/setups', title: t('nav.setups'), desc: t('home.setupsDesc'), Icon: Wrench },
     { href: '/goals', title: t('nav.goals'), desc: t('home.goalsDesc'), Icon: Target },
   ];

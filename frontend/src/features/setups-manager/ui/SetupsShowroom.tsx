@@ -13,12 +13,7 @@ import { Button } from '@/shared/ui/button';
 import { Badge } from '@/shared/ui/badge';
 import { CatalogThumbnail } from '@/shared/ui/catalog-thumbnail';
 import { SkeletonRows } from '@/shared/ui/skeleton';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Card, CardContent } from '@/shared/ui/card';
 import { cn } from '@/shared/lib/utils';
 
@@ -31,10 +26,20 @@ export function SetupsShowroom() {
   return (
     <div className="space-y-4">
       <div className="flex gap-2" role="group" aria-label={t('setups.title')}>
-        <Button size="sm" variant={mine ? 'outline' : 'default'} aria-pressed={!mine} onClick={() => setMine(false)}>
+        <Button
+          size="sm"
+          variant={mine ? 'outline' : 'default'}
+          aria-pressed={!mine}
+          onClick={() => setMine(false)}
+        >
           {t('setups.showroom')}
         </Button>
-        <Button size="sm" variant={mine ? 'default' : 'outline'} aria-pressed={mine} onClick={() => setMine(true)}>
+        <Button
+          size="sm"
+          variant={mine ? 'default' : 'outline'}
+          aria-pressed={mine}
+          onClick={() => setMine(true)}
+        >
           {t('setups.mine')}
         </Button>
       </div>
@@ -85,7 +90,9 @@ function SetupCard({ setup, onOpen }: { setup: Setup; onOpen: () => void }) {
         </Badge>
       </div>
 
-      {setup.notes && <p className="line-clamp-2 text-xs text-muted-foreground">{setup.notes}</p>}
+      {setup.notes && (
+        <p className="line-clamp-2 text-xs text-muted-foreground">{setup.notes}</p>
+      )}
 
       <div className="mt-auto flex items-center justify-between pt-1 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1">
@@ -106,7 +113,11 @@ function SetupCard({ setup, onOpen }: { setup: Setup; onOpen: () => void }) {
                 aria-label={setup.public ? t('setups.unpublish') : t('setups.publish')}
                 title={setup.public ? t('setups.unpublish') : t('setups.publish')}
               >
-                {setup.public ? <Lock className="size-3.5" /> : <Globe className="size-3.5" />}
+                {setup.public ? (
+                  <Lock className="size-3.5" />
+                ) : (
+                  <Globe className="size-3.5" />
+                )}
               </button>
               <button
                 type="button"

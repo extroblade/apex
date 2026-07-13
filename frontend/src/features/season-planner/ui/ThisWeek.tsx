@@ -32,7 +32,9 @@ export function ThisWeek() {
 
   const thisWeek = favorites
     .map((s) => ({ series: s, week: s.weeks.find((w) => w.week === currentWeek) }))
-    .filter((x): x is { series: SeasonSeries; week: NonNullable<typeof x.week> } => !!x.week);
+    .filter(
+      (x): x is { series: SeasonSeries; week: NonNullable<typeof x.week> } => !!x.week,
+    );
 
   if (thisWeek.length === 0) {
     return (

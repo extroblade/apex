@@ -36,8 +36,7 @@ export function SeasonPlanner() {
   const currentWeek = season.data?.currentWeek ?? 1;
   const totalWeeks = season.data?.totalWeeks ?? 13;
   const plannedTotal = useMemo(
-    () =>
-      allSeries.reduce((sum, s) => sum + s.weeks.filter((w) => w.planned).length, 0),
+    () => allSeries.reduce((sum, s) => sum + s.weeks.filter((w) => w.planned).length, 0),
     [allSeries],
   );
 
@@ -52,7 +51,11 @@ export function SeasonPlanner() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2" role="group" aria-label={t('planner.title')}>
+        <div
+          className="flex flex-wrap gap-2"
+          role="group"
+          aria-label={t('planner.title')}
+        >
           <Button
             size="sm"
             variant={favoritesOnly ? 'default' : 'outline'}
@@ -91,10 +94,22 @@ export function SeasonPlanner() {
             <CalendarCheck className="size-3.5" />
             {t('planner.plannedCount', { n: plannedTotal })}
           </span>
-          <LegendSwatch className="bg-green-500/25 ring-1 ring-green-600" label={t('planner.legendFree')} />
-          <LegendSwatch className="bg-teal-500/25 ring-1 ring-teal-600" label={t('planner.legendOwned')} />
-          <LegendSwatch className="bg-red-500/20 ring-1 ring-red-600/70" label={t('planner.legendMissing')} />
-          <LegendSwatch className="bg-amber-400/40 ring-2 ring-amber-500" label={t('planner.legendPlanned')} />
+          <LegendSwatch
+            className="bg-green-500/25 ring-1 ring-green-600"
+            label={t('planner.legendFree')}
+          />
+          <LegendSwatch
+            className="bg-teal-500/25 ring-1 ring-teal-600"
+            label={t('planner.legendOwned')}
+          />
+          <LegendSwatch
+            className="bg-red-500/20 ring-1 ring-red-600/70"
+            label={t('planner.legendMissing')}
+          />
+          <LegendSwatch
+            className="bg-amber-400/40 ring-2 ring-amber-500"
+            label={t('planner.legendPlanned')}
+          />
         </div>
       </div>
 
@@ -109,9 +124,17 @@ export function SeasonPlanner() {
         // Break out of the centered <main> container so the grid uses ~full width.
         <div className="mx-[calc(50%-50vw)] w-screen px-4 sm:px-6 lg:px-8">
           {transposed ? (
-            <WeeksBySeries series={shown} currentWeek={currentWeek} totalWeeks={totalWeeks} />
+            <WeeksBySeries
+              series={shown}
+              currentWeek={currentWeek}
+              totalWeeks={totalWeeks}
+            />
           ) : (
-            <SeriesByWeeks series={shown} currentWeek={currentWeek} totalWeeks={totalWeeks} />
+            <SeriesByWeeks
+              series={shown}
+              currentWeek={currentWeek}
+              totalWeeks={totalWeeks}
+            />
           )}
         </div>
       )}
@@ -279,7 +302,10 @@ function WeeksBySeries({
           {weekNumbers.map((n) => (
             <tr
               key={n}
-              className={cn('border-b align-top last:border-0', n === currentWeek && 'bg-primary/10')}
+              className={cn(
+                'border-b align-top last:border-0',
+                n === currentWeek && 'bg-primary/10',
+              )}
             >
               <th
                 scope="row"

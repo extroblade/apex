@@ -12,10 +12,10 @@ import (
 	"apex/internal/cache"
 	"apex/internal/config"
 	"apex/internal/features"
+	"apex/internal/goals"
 	"apex/internal/handler"
 	"apex/internal/iracing"
 	"apex/internal/middleware"
-	"apex/internal/goals"
 	"apex/internal/racing"
 	"apex/internal/secretbox"
 	"apex/internal/setups"
@@ -54,16 +54,16 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/health", h.Health)
-			r.Get("/features", h.ListFeatures)
-			r.Post("/fuel/plan", h.FuelPlan)
+		r.Get("/features", h.ListFeatures)
+		r.Post("/fuel/plan", h.FuelPlan)
 
-			// Cockpit dev-overlay: gated by the developer cookie matching
-			// DEVELOPER_KEY (each handler calls devAuth → 404 otherwise). No
-			// feature-flag gate here — that would be a chicken-and-egg, since the
-			// toggle endpoint is how you'd flip flags in the first place.
-			r.Get("/features/all", h.AllFeatures)
-			r.Put("/features/{key}", h.ToggleFeature)
-			r.Get("/health/cockpit", h.HealthCockpit)
+		// Cockpit dev-overlay: gated by the developer cookie matching
+		// DEVELOPER_KEY (each handler calls devAuth → 404 otherwise). No
+		// feature-flag gate here — that would be a chicken-and-egg, since the
+		// toggle endpoint is how you'd flip flags in the first place.
+		r.Get("/features/all", h.AllFeatures)
+		r.Put("/features/{key}", h.ToggleFeature)
+		r.Get("/health/cockpit", h.HealthCockpit)
 
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/register", h.Register)

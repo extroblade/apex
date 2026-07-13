@@ -21,8 +21,7 @@ export function useSetups(mine = false) {
 export function useSetup(id: number | null, download = false) {
   return useQuery({
     queryKey: setupsKeys.one(id ?? 0),
-    queryFn: () =>
-      apiFetch<Setup>(`/api/setups/${id}${download ? '?download=1' : ''}`),
+    queryFn: () => apiFetch<Setup>(`/api/setups/${id}${download ? '?download=1' : ''}`),
     enabled: id != null,
   });
 }
@@ -71,8 +70,7 @@ export function useSetSetupPublic() {
 export function useDeleteSetup() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) =>
-      apiFetch<void>(`/api/setups/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => apiFetch<void>(`/api/setups/${id}`, { method: 'DELETE' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: setupsKeys.all }),
   });
 }

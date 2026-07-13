@@ -62,7 +62,9 @@ export function useSetRacePlanned() {
                 s.seriesId === seriesId
                   ? {
                       ...s,
-                      weeks: s.weeks.map((w) => (w.week === week ? { ...w, planned } : w)),
+                      weeks: s.weeks.map((w) =>
+                        w.week === week ? { ...w, planned } : w,
+                      ),
                     }
                   : s,
               ),

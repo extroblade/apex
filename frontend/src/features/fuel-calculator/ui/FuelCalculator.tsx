@@ -60,7 +60,9 @@ export function FuelCalculator() {
   // Minute-based windows need the average lap time even for lap races.
   const needLapTime =
     raceType === 'time' ||
-    windows.slice(0, windowRows).some((w) => w.unit === 'minutes' && (w.from > 0 || w.to > 0));
+    windows
+      .slice(0, windowRows)
+      .some((w) => w.unit === 'minutes' && (w.from > 0 || w.to > 0));
 
   const setWindow = (i: number, patch: Partial<PitWindow>) => {
     setWindows((prev) => {
@@ -136,8 +138,16 @@ export function FuelCalculator() {
               />
             )}
 
-            <Field label={t('fuel.fuelPerLap')} value={fuelPerLap} onChange={setFuelPerLap} />
-            <Field label={t('fuel.tank')} value={tankCapacity} onChange={setTankCapacity} />
+            <Field
+              label={t('fuel.fuelPerLap')}
+              value={fuelPerLap}
+              onChange={setFuelPerLap}
+            />
+            <Field
+              label={t('fuel.tank')}
+              value={tankCapacity}
+              onChange={setTankCapacity}
+            />
             <Field label={t('fuel.margin')} value={extraLaps} onChange={setExtraLaps} />
 
             <div className="space-y-1.5">

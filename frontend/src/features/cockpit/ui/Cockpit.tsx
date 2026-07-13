@@ -3,11 +3,7 @@ import { Wrench } from 'lucide-react';
 
 import { useTranslation } from '@/shared/i18n';
 import { isDev } from '@/shared/lib/dev';
-import {
-  useAllFeatures,
-  useCockpitHealth,
-  useToggleFeature,
-} from '@/entities/features';
+import { useAllFeatures, useCockpitHealth, useToggleFeature } from '@/entities/features';
 import { Button } from '@/shared/ui/button';
 import { Switch } from '@/shared/ui/switch';
 import {
@@ -92,9 +88,7 @@ function CockpitBody() {
                     checked={enabled}
                     disabled={toggle.isPending}
                     aria-labelledby={`flag-${key}`}
-                    onCheckedChange={(next) =>
-                      toggle.mutate({ key, enabled: next })
-                    }
+                    onCheckedChange={(next) => toggle.mutate({ key, enabled: next })}
                   />
                 </li>
               ))}

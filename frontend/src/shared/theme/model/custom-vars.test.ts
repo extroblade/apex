@@ -25,9 +25,7 @@ describe('custom theme vars', () => {
 
     applyCustomVars('custom');
     expect(document.documentElement.style.getPropertyValue('--primary')).toBe('#123456');
-    expect(
-      document.documentElement.style.getPropertyValue('--app-font'),
-    ).not.toBe('');
+    expect(document.documentElement.style.getPropertyValue('--app-font')).not.toBe('');
 
     applyCustomVars('light');
     expect(document.documentElement.style.getPropertyValue('--primary')).toBe('');

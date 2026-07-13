@@ -37,8 +37,8 @@ export function GaragePage() {
       <div>
         <h1 className="text-2xl font-semibold">Garage</h1>
         <p className="text-sm text-muted-foreground">
-          Mark the cars and tracks you own, and favorite the series you race — your
-          set is saved and drives the planner.
+          Mark the cars and tracks you own, and favorite the series you race — your set is
+          saved and drives the planner.
         </p>
       </div>
       <GarageManager />

@@ -39,21 +39,21 @@ type Config struct {
 // Load reads configuration from the environment, applying sensible defaults.
 func Load() *Config {
 	return &Config{
-		Port:       env("PORT", "8080"),
-		DBHost:     env("DB_HOST", "localhost"),
-		DBPort:     env("DB_PORT", "3306"),
-		DBUser:     env("DB_USER", "app"),
-		DBPassword: env("DB_PASSWORD", "app"),
-		DBName:       env("DB_NAME", "app"),
-		CORSOrigin:    env("CORS_ORIGIN", "*"),
+		Port:                env("PORT", "8080"),
+		DBHost:              env("DB_HOST", "localhost"),
+		DBPort:              env("DB_PORT", "3306"),
+		DBUser:              env("DB_USER", "app"),
+		DBPassword:          env("DB_PASSWORD", "app"),
+		DBName:              env("DB_NAME", "app"),
+		CORSOrigin:          env("CORS_ORIGIN", "*"),
 		CookieSecure:        env("COOKIE_SECURE", "false") == "true",
 		EncryptionKey:       env("APP_ENCRYPTION_KEY", ""),
 		IRacingClientID:     env("IRACING_CLIENT_ID", ""),
 		IRacingClientSecret: env("IRACING_CLIENT_SECRET", ""),
-			IRacingRedirectURI:  env("IRACING_OAUTH_REDIRECT_URI", ""),
-			DeveloperKey:       env("DEVELOPER_KEY", ""),
-			RedisAddr:          env("REDIS_ADDR", ""),
-		}
+		IRacingRedirectURI:  env("IRACING_OAUTH_REDIRECT_URI", ""),
+		DeveloperKey:        env("DEVELOPER_KEY", ""),
+		RedisAddr:           env("REDIS_ADDR", ""),
+	}
 }
 
 // DSN builds the MySQL data source name.

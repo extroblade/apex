@@ -1,11 +1,6 @@
 import { Check, Minus, Plus, Trash2 } from 'lucide-react';
 
-import {
-  useGoals,
-  useUpdateGoal,
-  useDeleteGoal,
-  type Goal,
-} from '@/entities/goals';
+import { useGoals, useUpdateGoal, useDeleteGoal, type Goal } from '@/entities/goals';
 import { useTranslation } from '@/shared/i18n';
 import { Button } from '@/shared/ui/button';
 import { SkeletonRows } from '@/shared/ui/skeleton';
@@ -60,7 +55,12 @@ function GoalRow({ goal }: { goal: Goal }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className={cn('font-medium', goal.done && 'text-muted-foreground line-through')}>
+            <span
+              className={cn(
+                'font-medium',
+                goal.done && 'text-muted-foreground line-through',
+              )}
+            >
               {goal.title}
             </span>
             {goal.done && (
@@ -70,7 +70,9 @@ function GoalRow({ goal }: { goal: Goal }) {
               </span>
             )}
           </div>
-          {goal.notes && <p className="mt-0.5 text-sm text-muted-foreground">{goal.notes}</p>}
+          {goal.notes && (
+            <p className="mt-0.5 text-sm text-muted-foreground">{goal.notes}</p>
+          )}
           {goal.dueDate && (
             <p className="mt-0.5 text-xs text-muted-foreground">
               {t('goals.by', { date: goal.dueDate })}
@@ -111,7 +113,10 @@ function GoalRow({ goal }: { goal: Goal }) {
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
             <div
-              className={cn('h-full rounded-full', goal.done ? 'bg-green-500' : 'bg-primary')}
+              className={cn(
+                'h-full rounded-full',
+                goal.done ? 'bg-green-500' : 'bg-primary',
+              )}
               style={{ width: `${pct}%` }}
             />
           </div>

@@ -1,0 +1,89 @@
+# Backend stack: MySQL + Go API. Self-contained so it can move to its own
+# repo later. Joins the shared external network `apex-net` so the frontend
+# (a separate compose project) can reach the `backend` service by name.
+name: apex-backend
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: app
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      # Schema is managed by the app's migration runner (internal/migrate),
+      # applied on startup — no initdb mount needed.
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - apex-net
+
+  backend:
+    build: .
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USER: app
+      DB_PASSWORD: app
+      DB_NAME: app
+      CORS_ORIGIN: "*"
+      # Dev-only key so the iRacing integration is enabled out of the box.
+      # Generate your own for anything real: head -c 32 /dev/urandom | base64
+      APP_ENCRYPTION_KEY: "BBaagx7zSXl/MbrekQWYgNPMOQhTsNt7IvRsSIUvctA="
+      # Fill these after registering an OAuth app with iRacing to enable linking.
+      IRACING_CLIENT_ID: "${IRACING_CLIENT_ID:-}"
+      IRACING_CLIENT_SECRET: "${IRACING_CLIENT_SECRET:-}"
+      IRACING_OAUTH_REDIRECT_URI: "${IRACING_OAUTH_REDIRECT_URI:-http://localhost:3000/api/iracing/callback}"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - apex-net
+
+  # Daily season-schedule sync: probes iRacing PDF URLs and scans ./schedules
+  # for manually downloaded PDFs, parsing new ones into season_schedule.
+  scheduler:
+    build: .
+    entrypoint: ["/app/scheduler"]
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USER: app
+      DB_PASSWORD: app
+      DB_NAME: app
+      SCHEDULE_PDF_DIR: /schedules
+      # SCHEDULE_PDF_URLS: comma-separated extra URLs to probe
+      # SCHEDULE_CHECK_INTERVAL: e.g. 1h (default 24h)
+    volumes:
+      - ./schedules:/schedules:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - apex-net
+
+volumes:
+  db_data:
+    # Pinned so the compose-project rename (vcapp-backend → apex-backend)
+    # can't silently create a fresh empty volume. dev.sh migrates the old
+    # vcapp-backend_db_data contents into this one on first run.
+    name: apex-db-data
+
+networks:
+  apex-net:
+    external: true

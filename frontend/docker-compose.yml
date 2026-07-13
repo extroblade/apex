@@ -1,0 +1,17 @@
+# Frontend stack: nginx-served SPA. Self-contained so it can move to its own
+# repo later. Joins the shared external network `apex-net`; nginx proxies
+# /api to the `backend` service running in the backend compose project.
+name: apex-frontend
+
+services:
+  frontend:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - apex-net
+
+networks:
+  apex-net:
+    external: true

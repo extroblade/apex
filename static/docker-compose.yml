@@ -1,0 +1,14 @@
+# Static asset service (default avatars). Self-contained; joins the shared
+# external network so the frontend's nginx can proxy /static/* to it.
+name: apex-static
+
+services:
+  static:
+    build: .
+    restart: unless-stopped
+    networks:
+      - apex-net
+
+networks:
+  apex-net:
+    external: true

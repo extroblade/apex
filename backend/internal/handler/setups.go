@@ -1,0 +1,136 @@
+package handler
+
+import (
+	"encoding/json"
+	"errors"
+	"net/http"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
+
+	"apex/internal/auth"
+	"apex/internal/setups"
+)
+
+// ListSetups returns the showroom (public setups + the caller's own), or only
+// the caller's own when ?mine=1.
+func (h *Handler) ListSetups(w http.ResponseWriter, r *http.Request) {
+	user, _ := auth.UserFromContext(r.Context())
+	items, err := h.Setups.List(r.Context(), user.ID, r.URL.Query().Get("mine") == "1")
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, errBody(err.Error()))
+		return
+	}
+	writeJSON(w, http.StatusOK, items)
+}
+
+// GetSetup returns one setup with its data. ?download=1 bumps the counter.
+func (h *Handler) GetSetup(w http.ResponseWriter, r *http.Request) {
+	user, _ := auth.UserFromContext(r.Context())
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil || id <= 0 {
+		writeJSON(w, http.StatusBadRequest, errBody("invalid id"))
+		return
+	}
+	st, err := h.Setups.Get(r.Context(), user.ID, id, r.URL.Query().Get("download") == "1")
+	if err != nil {
+		writeJSON(w, setupStatus(err), errBody(err.Error()))
+		return
+	}
+	writeJSON(w, http.StatusOK, st)
+}
+
+// CreateSetup saves a new setup owned by the caller.
+func (h *Handler) CreateSetup(w http.ResponseWriter, r *http.Request) {
+	user, _ := auth.UserFromContext(r.Context())
+	var req struct {
+		CarID   int    `json:"carId"`
+		TrackID int    `json:"trackId"`
+		Name    string `json:"name"`
+		Notes   string `json:"notes"`
+		Data    string `json:"data"`
+		Public  bool   `json:"public"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, errBody("invalid JSON body"))
+		return
+	}
+	st, err := h.Setups.Create(r.Context(), user.ID, setups.Input{
+		CarID: req.CarID, TrackID: req.TrackID, Name: req.Name,
+		Notes: req.Notes, Data: req.Data, Public: req.Public,
+	})
+	if err != nil {
+		writeJSON(w, setupStatus(err), errBody(err.Error()))
+		return
+	}
+	writeJSON(w, http.StatusCreated, st)
+}
+
+// SetSetupPublic publishes/unpublishes a setup the caller owns.
+func (h *Handler) SetSetupPublic(w http.ResponseWriter, r *http.Request) {
+	user, _ := auth.UserFromContext(r.Context())
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil || id <= 0 {
+		writeJSON(w, http.StatusBadRequest, errBody("invalid id"))
+		return
+	}
+	var req struct {
+		Public *bool `json:"public"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Public == nil {
+		writeJSON(w, http.StatusBadRequest, errBody("public is required"))
+		return
+	}
+	if err := h.Setups.SetPublic(r.Context(), user.ID, id, *req.Public); err != nil {
+		writeJSON(w, setupStatus(err), errBody(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// GenerateSetup returns a generated baseline for a car+track combo (not
+// saved — the client prefills the create form with it).
+func (h *Handler) GenerateSetup(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		CarID   int `json:"carId"`
+		TrackID int `json:"trackId"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.CarID <= 0 {
+		writeJSON(w, http.StatusBadRequest, errBody("carId is required"))
+		return
+	}
+	gen, err := h.Setups.Generate(r.Context(), req.CarID, req.TrackID)
+	if err != nil {
+		writeJSON(w, setupStatus(err), errBody(err.Error()))
+		return
+	}
+	writeJSON(w, http.StatusOK, gen)
+}
+
+// DeleteSetup removes a setup the caller owns.
+func (h *Handler) DeleteSetup(w http.ResponseWriter, r *http.Request) {
+	user, _ := auth.UserFromContext(r.Context())
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil || id <= 0 {
+		writeJSON(w, http.StatusBadRequest, errBody("invalid id"))
+		return
+	}
+	if err := h.Setups.Delete(r.Context(), user.ID, id); err != nil {
+		writeJSON(w, setupStatus(err), errBody(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func setupStatus(err error) int {
+	switch {
+	case errors.Is(err, setups.ErrNotFound):
+		return http.StatusNotFound
+	case errors.Is(err, setups.ErrForbidden):
+		return http.StatusForbidden
+	case errors.Is(err, setups.ErrInvalid):
+		return http.StatusUnprocessableEntity
+	default:
+		return http.StatusInternalServerError
+	}
+}

@@ -1,0 +1,75 @@
+# Backend (Go) guide
+
+Go 1.25. Module `apex`. Standard project layout.
+
+## Layout
+
+- `cmd/server/` — entrypoint, graceful shutdown.
+- `internal/config` — env-based config (`Load()`), one place for all env vars.
+- `internal/db` — MySQL pool + connect-retry.
+- `internal/server` — chi router wiring; builds the `Handler` and its services.
+- `internal/handler` — HTTP handlers only. Decode → call a service → `writeJSON`.
+- `internal/auth` — app accounts, bcrypt, DB-backed sessions.
+- `internal/iracing` — iRacing Data API client (OAuth + typed endpoints).
+- `internal/racing` — application service: link accounts (OAuth), token cache,
+  stats, driver lookup, sync, comparators, planner, catalog seed (`seed.go` +
+  `catalog_seed.json`, upserted every startup). The seed is GENERATED
+  (`scripts/gen-catalog-seed.py`) from my-racing-planner's exports: real ids,
+  the real season schedule (weeks + `race_date`, windowed to the current
+  13-week season), and `series_cars` (precise series→car eligibility). NEVER
+  hand-invent schedule data. `seed.go` also reconciles stale pre-real-id rows
+  by normalized name. `access.go` resolves per-user track access
+  (free/owned/missing) via `is_free`, `sku_group`, and `track_requirements`
+  (combined layouts).
+- `internal/setups` — setups showroom store (private + public car setups,
+  download counter). `internal/goals` — goal tracker (numeric goals + progress).
+- `internal/schedulepdf` — parses season-schedule PDFs into `season_schedule`
+  (name-matched to the catalog) and extracts the header banner (`images.go`;
+  the PDF has no per-series logos).
+- `internal/contentsync` — used by the scheduler to keep the catalog complete:
+  upserts the community JSON car/track lists (full ids incl. legacy, prices, sku
+  groups) and enriches rows with artwork + free flags scraped by name from the
+  iRacing web catalog (`webcatalog.go`, `iracing.com/cars` + `/tracks`).
+- `cmd/scheduler` — companion service (own compose project): checks for a new
+  season PDF **daily** and runs `contentsync` **weekly** (both configurable;
+  content on its own goroutine). It waits for the API's migrations, never runs
+  them.
+- `internal/features` — DB-backed feature flags (`feature_flags` table, 30s
+  cache). `iracing_oauth` is seeded OFF; OAuth-dependent routes are wrapped in
+  `requireFeature` (404 when off) in `internal/server`.
+- `internal/secretbox` — AES-256-GCM for secrets at rest.
+- `internal/middleware` — CORS, auth (`Auth` populates context, `RequireAuth` gates).
+- `migrations/` — `*.sql`, applied by MySQL initdb on first volume init only.
+
+## Conventions
+
+- **Errors are values.** Return `(T, error)`; check `if err != nil`. Define
+  sentinel errors (`ErrFoo`) and branch with `errors.Is` / `errors.As`.
+- **Handlers stay thin.** Business logic lives in services, not handlers. Handlers
+  parse input, call a service, and map errors to status codes.
+- **Program to interfaces at boundaries** (e.g. `racing.APIClient`) so tests can
+  inject fakes with no network. Keep a `var _ Iface = (*Impl)(nil)` assertion.
+- **DB access** uses `database/sql` with context methods (`QueryRowContext`,
+  `ExecContext`); handle `sql.ErrNoRows`; use transactions for batch writes.
+- **Tests**: table-driven with `t.Run`; `httptest` for handlers; a fake for any
+  network/DB boundary. Run `go test ./...` before finishing.
+
+## Schema changes
+
+Migrations live in `internal/migrate/migrations/*.sql`, are embedded via
+`go:embed`, and run on startup via `internal/migrate` (tracked in
+`schema_migrations`). Add a new numbered file and restart the backend — it
+applies automatically. The DSN sets `multiStatements=true` so a file may hold
+multiple statements.
+
+**Never edit an already-applied migration** — the runner tracks by filename and
+won't re-run it, so an edit silently no-ops on existing databases. Always add a
+NEW numbered file, and keep changes **additive** (new columns with defaults, new
+tables) so existing user data is preserved across deploys — no `down -v` needed.
+The car/track/series catalog is re-upserted on every startup
+(`racing.SeedCatalog`), so seed edits apply on restart without data loss.
+
+## Adding config
+
+Add the field to `config.Config`, read it in `Load()` via `env(...)`, document
+it in `.env.example`, and (if needed for Docker) in `backend/docker-compose.yml`.

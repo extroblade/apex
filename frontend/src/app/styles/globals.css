@@ -1,0 +1,171 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+}
+
+/* Custom "racing" theme: carbon background with an orange accent. Defines the
+   full token set so it stands alone regardless of the dark variant. */
+.custom {
+  --background: oklch(0.17 0.012 260);
+  --foreground: oklch(0.97 0 0);
+  --card: oklch(0.22 0.014 260);
+  --card-foreground: oklch(0.97 0 0);
+  --popover: oklch(0.22 0.014 260);
+  --popover-foreground: oklch(0.97 0 0);
+  --primary: oklch(0.72 0.19 47);
+  --primary-foreground: oklch(0.16 0.01 260);
+  --secondary: oklch(0.29 0.014 260);
+  --secondary-foreground: oklch(0.97 0 0);
+  --muted: oklch(0.29 0.014 260);
+  --muted-foreground: oklch(0.72 0.02 260);
+  --accent: oklch(0.72 0.19 47);
+  --accent-foreground: oklch(0.16 0.01 260);
+  --destructive: oklch(0.7 0.19 22);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.72 0.19 47);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* --app-font is set by the custom-theme configurator; falls back to sans. */
+    font-family: var(--app-font, ui-sans-serif, system-ui, sans-serif);
+  }
+}
+
+/* --- fx: reactbits-style animated components (shared/ui/fx) ------------- */
+
+@keyframes fx-aurora-drift {
+  0% {
+    transform: translate(-12%, -8%) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate(10%, 6%) scale(1.15) rotate(20deg);
+  }
+  100% {
+    transform: translate(-6%, 10%) scale(0.95) rotate(-12deg);
+  }
+}
+
+@keyframes fx-text-shine {
+  to {
+    background-position: -200% center;
+  }
+}
+
+.fx-aurora-blob {
+  animation: fx-aurora-drift 16s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.fx-shiny-text {
+  background: linear-gradient(
+    120deg,
+    var(--foreground) 40%,
+    var(--primary) 50%,
+    var(--foreground) 60%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: fx-text-shine 4s linear infinite;
+}
+
+/* Pointer-following radial highlight; --fx-x/--fx-y set from JS. */
+.fx-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(
+    240px circle at var(--fx-x, 50%) var(--fx-y, 50%),
+    color-mix(in oklch, var(--primary) 14%, transparent),
+    transparent 65%
+  );
+}
+.fx-spotlight:hover::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-aurora-blob,
+  .fx-shiny-text {
+    animation: none;
+  }
+}

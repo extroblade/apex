@@ -130,7 +130,6 @@ export const ru: Translation = {
     calculate: 'Рассчитать',
     calculating: 'Расчёт…',
     planTitle: 'План',
-    planDesc: 'Рассчитано Go-бэкендом.',
     fillForm: 'Заполните форму и нажмите «Рассчитать».',
     totalLaps: 'Всего кругов',
     pitStops: 'Пит-стопы',

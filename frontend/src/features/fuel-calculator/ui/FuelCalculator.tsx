@@ -246,7 +246,6 @@ export function FuelCalculator() {
       <Card>
         <CardHeader>
           <CardTitle>{t('fuel.planTitle')}</CardTitle>
-          <CardDescription>{t('fuel.planDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (

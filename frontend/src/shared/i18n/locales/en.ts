@@ -128,7 +128,6 @@ export const en = {
     calculate: 'Calculate',
     calculating: 'Calculating…',
     planTitle: 'Plan',
-    planDesc: 'Computed by the Go backend.',
     fillForm: 'Fill the form and calculate.',
     totalLaps: 'Total laps',
     pitStops: 'Pit stops',

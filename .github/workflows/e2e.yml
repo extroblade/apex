@@ -25,6 +25,12 @@ jobs:
       - name: create shared network
         run: docker network create apex-net
 
+      # The static service mounts the external apex-media-data volume (normally
+      # created when the scheduler starts). e2e skips the scheduler, so create
+      # the empty volume up front or the static compose fails to start.
+      - name: create media volume
+        run: docker volume create --name apex-media-data
+
       - name: start backend (db + api)
         run: docker compose -f backend/docker-compose.yml up -d --build db backend
 

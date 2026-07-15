@@ -4,7 +4,7 @@ import { registerNewUser } from './helpers';
 // Pixel = Chromium-based device profile (WebKit isn't installed in this setup).
 test.use({ ...devices['Pixel 7'] });
 
-test('mobile: bottom bar fits items without More; profile stays in the header', async ({
+test('mobile: bottom bar folds overflow into More; profile stays in the header', async ({
   page,
 }) => {
   await registerNewUser(page, 'mob');
@@ -12,8 +12,10 @@ test('mobile: bottom bar fits items without More; profile stays in the header', 
   const bar = page.getByRole('navigation', { name: 'Primary' });
   await expect(bar).toBeVisible();
 
-  // With iRacing off there are 4 items — they all fit, so no "More" button.
-  await expect(bar.getByRole('button', { name: 'More' })).toHaveCount(0);
+  // With iRacing off there are 6 items (Home, Fuel, Planner, Garage, Setups,
+  // Goals) — more than the 5 slots, so the last two fold behind a "More" button.
+  await expect(bar.getByRole('button', { name: 'More' })).toBeVisible();
+  // Garage is one of the primary (always-visible) slots.
   await expect(bar.getByRole('link', { name: 'Garage', exact: true })).toBeVisible();
 
   // Primary items navigate.

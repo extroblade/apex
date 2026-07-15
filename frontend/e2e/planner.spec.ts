@@ -17,7 +17,9 @@ test('season planner: favorite a series in the garage, see its season row', asyn
   // Planner: the season view shows the favorites grid.
   await page.getByRole('link', { name: 'Planner', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Race Planner' })).toBeVisible();
-  await expect(page.getByText('/13 weeks', { exact: false }).first()).toBeVisible();
+  // Each series header shows an "owned/total weeks" badge; the total is that
+  // series' own week count (not always 13), so match the pattern, not a literal.
+  await expect(page.getByText(/\/\d+ weeks/).first()).toBeVisible();
 
   // The grid has 13 week columns.
   await expect(page.getByRole('columnheader', { name: 'W13' })).toBeVisible();

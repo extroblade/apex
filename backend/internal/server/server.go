@@ -16,6 +16,7 @@ import (
 	"apex/internal/handler"
 	"apex/internal/iracing"
 	"apex/internal/locales"
+	"apex/internal/metrics"
 	"apex/internal/middleware"
 	"apex/internal/racing"
 	"apex/internal/secretbox"
@@ -51,8 +52,13 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 	r.Use(chimw.RealIP)
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
+	r.Use(metrics.Middleware)
 	r.Use(middleware.CORS(cfg.CORSOrigin))
 	r.Use(middleware.Auth(authSvc))
+
+	// Prometheus exposition. At the root (not under /api) and not proxied by the
+	// frontend nginx, so it's only reachable inside apex-net for scraping.
+	r.Handle("/metrics", metrics.Handler())
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/health", h.Health)

@@ -3,6 +3,7 @@ module apex
 go 1.25.0
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728

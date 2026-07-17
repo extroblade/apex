@@ -12,6 +12,7 @@ import (
 
 	"apex/internal/config"
 	"apex/internal/db"
+	"apex/internal/locales"
 	"apex/internal/migrate"
 	"apex/internal/racing"
 	"apex/internal/server"
@@ -34,6 +35,12 @@ func main() {
 	// so the planner works without any external source.
 	if err := racing.SeedCatalog(context.Background(), database); err != nil {
 		log.Fatalf("seed catalog: %v", err)
+	}
+
+	// Seed the built-in i18n bundles (en, ru) into the locales table; the app
+	// reads the language list + non-en bundles from here.
+	if err := locales.Seed(context.Background(), database); err != nil {
+		log.Fatalf("seed locales: %v", err)
 	}
 
 	srv := &http.Server{

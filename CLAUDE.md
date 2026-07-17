@@ -120,8 +120,18 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
 - **fx components** (`shared/ui/fx/`): `Aurora` animated background,
   `ShinyText`, `SpotlightCard` — reactbits.dev-style, token-driven (theme-safe),
   `prefers-reduced-motion` aware. Used on Home hero + Login.
-- Locales are exported to the static service (`frontend/scripts/gen-locales.mjs`
-  → `static/locales/`); the language menu is manifest-driven.
+- **Backend-driven i18n** (`internal/locales`, `handler/locales.go`,
+  `shared/i18n`): `en` is bundled in the frontend as the instant/offline fallback
+  AND the source of the `Translation` type; every other language (incl. `ru`) is
+  a row in the `locales` table (migration 0023), served by `GET /api/locales`
+  (list) + `GET /api/locales/{code}` (bundle JSON). A new language is a DB row —
+  no frontend deploy (proven: `INSERT` a locale, it appears in the menu). `en.ts`
+  + `ru.ts` stay the authored, type-checked source; `npm run gen:locales`
+  (part of `npm run build`) exports them to `backend/internal/locales/data/*.json`
+  for the backend to `go:embed` + seed on startup (built-ins re-seed via
+  `ON DUPLICATE KEY UPDATE`; runtime-added locales are untouched). A key-parity
+  test (`internal/locales`) guards the generated bundles against drift.
+  `setLanguage` fetches non-`en` bundles on demand; missing keys fall back to en.
 - **Catalog image rehosting** (`internal/contentsync/images.go`): the scheduler
   downloads each catalog image once (per base name — configs share art) into the
   shared **`apex-media-data`** volume and rewrites `image_path` to a relative
@@ -176,15 +186,18 @@ content model + track dedup, content sync (JSON list + iRacing web catalog),
 setups showroom, goal tracker, forms on zod + react-hook-form, precise
 series→car mapping (`series_cars` in the seed), **catalog image rehosting +
 description backfill**, **Cockpit dev overlay**, **Redis cache (fail-open)**,
-**backend-driven navigation** (nav service + side menu + minimal header).
+**backend-driven navigation** (nav service + side menu + minimal header),
+**setup pack generator** (2×4 skill×session), **backend-driven i18n** (locales
+service + DB-served bundles).
 
-1. **Backend-driven i18n**: the locale list is still generated FROM the frontend
-   at build time (`gen-locales.mjs` → `static/locales/index.json`), so a new
-   language needs a frontend deploy. Move the list + bundles to the backend
-   (`GET /api/locales`, `GET /api/locales/{code}`) and keep `en` bundled as the
-   instant fallback AND the source of the `Translation` type (agreed with user).
-2. Edit `nav_items` from the Cockpit (the menu is DB-driven; the UI is missing).
-3. Track layout art (generated SVGs in `static/`).
-4. Microfrontend split (module federation) — design first, don't ad-hoc it.
-5. Extend the Redis cache to catalog reads (cars/tracks/series). Today only the
+1. **BFF (NestJS)** for a future mobile app: a Backend-for-Frontend that reshapes
+   the Go API's data for mobile (own compose project on `apex-net`, like `nav/`).
+   Design first — don't ad-hoc it.
+2. **Metrics**: a universal, provider-agnostic counter across all tiers. Frontend
+   `counterHelper('event')(params)` (default provider Yandex Metrica, key from
+   ENV — left empty for now); backend + BFF get their own metrics too.
+3. Edit `nav_items` from the Cockpit (the menu is DB-driven; the UI is missing).
+4. Track layout art (generated SVGs in `static/`).
+5. Microfrontend split (module federation) — design first, don't ad-hoc it.
+6. Extend the Redis cache to catalog reads (cars/tracks/series). Today only the
    feature flags go through `internal/cache`; catalog reads still hit MySQL.

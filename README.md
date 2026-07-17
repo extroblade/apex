@@ -7,7 +7,8 @@ React + TypeScript frontend. Everything is Dockerized.
 - **Backend** — Go 1.25, [chi](https://github.com/go-chi/chi) router, `database/sql` + MySQL driver. HTTP API + a daily schedule-sync scheduler.
 - **Frontend** — React + TypeScript, built with [rsbuild](https://rsbuild.dev). Routing via [wouter](https://github.com/molefrog/wouter), client state via [zustand](https://zustand.docs.pmnd.rs), server state via [TanStack Query](https://tanstack.com/query), UI via [shadcn/ui](https://ui.shadcn.com) + Tailwind CSS v4. Organized with [Feature-Sliced Design](https://feature-sliced.design).
 - **Nav** — a small standalone Go service that owns the app's **menu configuration** (`nav_items`) and serves it at `/api/nav`, so navigation is data on the backend rather than hard-coded in the SPA. It needs only MySQL: it serves the menu plus each item's `requiresAuth`/`featureFlag` metadata and lets the client (which already holds the viewer and the flags) filter — navigation isn't a security boundary, since every API route enforces its own auth.
-- **Static** — nginx serving generated default avatars, exported i18n locales, and rehosted catalog images (`/media/catalog/*`) from the shared `apex-media-data` volume the scheduler writes to.
+- **Static** — nginx serving generated default avatars and rehosted catalog images (`/media/catalog/*`) from the shared `apex-media-data` volume the scheduler writes to.
+- **i18n** — backend-driven: only `en` is bundled in the app (instant fallback + the translation type); every other language is a row in the `locales` table, served by `GET /api/locales` + `GET /api/locales/{code}`, so a new language ships with **no frontend deploy**.
 - **Database** — MySQL 8.4 (Dockerized).
 - **Cache** — Redis 7 (Dockerized, no external port). A strictly **fail-open** wrapper (`internal/cache`): if Redis is unset or down, reads fall through to MySQL with no error and no stall (300ms op timeout, no retries). Caches feature flags today.
 - **Docker** — the backend (`backend/docker-compose.yml`), frontend (`frontend/docker-compose.yml`), static (`static/docker-compose.yml`), and nav (`nav/docker-compose.yml`) are **separate compose projects** joined by a shared external network, so each can be split into its own repo later. `./dev.sh` runs them all with one command.
@@ -60,7 +61,7 @@ React + TypeScript frontend. Everything is Dockerized.
 │   ├── nginx.conf            # prod: serves SPA, proxies /api → backend
 │   ├── docker-compose.yml    # frontend project
 │   └── Dockerfile
-├── static/                   # nginx: avatars + exported locales
+├── static/                   # nginx: avatars + catalog media
 ├── nav/                      # menu service (own Go module + compose project)
 │   ├── main.go               # GET /api/nav
 │   ├── migrate.go            # owns + seeds the nav_items table
@@ -138,6 +139,8 @@ Tip: `docker compose up db` to run just MySQL while developing the apps natively
 | GET    | `/api/health`         | —    | Liveness + DB connectivity           |
 | GET    | `/api/features`       | —    | Public feature-flag map              |
 | GET    | `/api/nav`            | —    | Menu config (nav service) — items + placement/gating metadata |
+| GET    | `/api/locales`        | —    | Available languages (backend-driven i18n) |
+| GET    | `/api/locales/{code}` | —    | One language's translation bundle (JSON) |
 | POST   | `/api/fuel/plan`      | —    | Compute a fuel & stint strategy      |
 | GET    | `/api/features/all`   | dev cookie | Cockpit: all flags (404 unless `developer` cookie = `DEVELOPER_KEY`) |
 | PUT    | `/api/features/{key}` | dev cookie | Cockpit: toggle a flag (`{"enabled":bool}`) |

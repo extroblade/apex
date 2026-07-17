@@ -15,6 +15,7 @@ import (
 	"apex/internal/goals"
 	"apex/internal/handler"
 	"apex/internal/iracing"
+	"apex/internal/locales"
 	"apex/internal/middleware"
 	"apex/internal/racing"
 	"apex/internal/secretbox"
@@ -38,6 +39,7 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 	h.Features = featuresSvc
 	h.Setups = setups.New(db)
 	h.Goals = goals.New(db)
+	h.Locales = locales.New(db)
 	h.Cache = redisCache
 	h.DeveloperKey = cfg.DeveloperKey
 
@@ -56,6 +58,10 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 		r.Get("/health", h.Health)
 		r.Get("/features", h.ListFeatures)
 		r.Post("/fuel/plan", h.FuelPlan)
+
+		// Backend-driven i18n: the language list + bundles live in the DB.
+		r.Get("/locales", h.ListLocales)
+		r.Get("/locales/{code}", h.GetLocale)
 
 		// Cockpit dev-overlay: gated by the developer cookie matching
 		// DEVELOPER_KEY (each handler calls devAuth → 404 otherwise). No

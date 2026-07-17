@@ -18,14 +18,18 @@ folds into a right-side "More"; the **profile/user menu stays in the header on
 all viewports** (never in the bar). Keep `main` padded (`pb-24 md:pb-8`) so the
 bar never covers content.
 
-Locales: bundled `en`+`ru` in `shared/i18n/locales/*.ts` are the source of
-truth; `npm run gen:locales` (part of `npm run build`) exports them + a
-manifest to `static/locales/`, served at `/media/locales/*`. The language menu
-lists the manifest (`useAvailableLocales`), and `setLanguage` fetches
-non-bundled locales from static — so new languages can ship without an app
-deploy. Boot requests (`/api/auth/me`, `/api/features`, locale manifest) are
-prefetched in `app/index.tsx` + `<link rel="preload">` in `index.html` (SPA
-preloading, NOT SSR — SSR would need a framework migration).
+Locales are **backend-driven**: only `en` is bundled (`shared/i18n/locales/en.ts`)
+— it's the instant/offline default AND the `Translation` type source. Every other
+language (incl. `ru`) is served by the backend: the menu lists `GET /api/locales`
+(`useAvailableLocales`) and `setLanguage` fetches `GET /api/locales/{code}` on
+demand, so a new language is a DB row with no app deploy. `en.ts`+`ru.ts` remain
+the authored, type-checked source (`ru.ts` typed against `en`); `npm run
+gen:locales` (part of `npm run build`) exports them to
+`backend/internal/locales/data/*.json` for the backend to embed + seed — it does
+NOT ship `ru` in the bundle. Boot requests (`/api/auth/me`, `/api/features`,
+`/api/nav`, `/api/locales`) are prefetched in `app/index.tsx` + `<link
+rel="preload">` in `index.html` (SPA preloading, NOT SSR — SSR would need a
+framework migration).
 
 The `custom` theme is user-configurable: `shared/theme/model/custom-vars.ts`
 (localStorage `custom-theme-vars`, applied as inline CSS vars incl.

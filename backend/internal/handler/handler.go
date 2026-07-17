@@ -9,6 +9,7 @@ import (
 	"apex/internal/cache"
 	"apex/internal/features"
 	"apex/internal/goals"
+	"apex/internal/locales"
 	"apex/internal/racing"
 	"apex/internal/setups"
 )
@@ -21,6 +22,7 @@ type Handler struct {
 	Features     *features.Service
 	Setups       *setups.Service
 	Goals        *goals.Service
+	Locales      *locales.Service
 	Cache        *cache.Cache // optional; nil-safe (fail-open)
 	CookieSecure bool
 	DeveloperKey string

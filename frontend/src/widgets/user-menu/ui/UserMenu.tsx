@@ -15,6 +15,7 @@ import { useViewer } from '@/entities/viewer';
 import { useLogout } from '@/features/auth';
 import { useThemeStore, THEMES, type Theme } from '@/shared/theme';
 import { useTranslation, setLanguage, useAvailableLocales } from '@/shared/i18n';
+import { useCounter, MetricEvents } from '@/shared/metrics';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { initials } from '@/shared/lib/initials';
 import {
@@ -46,6 +47,7 @@ export function UserMenu() {
   const setTheme = useThemeStore((s) => s.setTheme);
   const { t, i18n } = useTranslation();
   const locales = useAvailableLocales();
+  const counter = useCounter();
 
   return (
     <DropdownMenu>
@@ -118,7 +120,10 @@ export function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={i18n.language}
-          onValueChange={(v) => void setLanguage(v)}
+          onValueChange={(v) => {
+            counter(MetricEvents.languageChanged)({ code: v });
+            void setLanguage(v);
+          }}
         >
           {locales.map((lng) => (
             <DropdownMenuRadioItem key={lng.code} value={lng.code}>

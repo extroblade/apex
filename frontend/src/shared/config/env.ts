@@ -8,4 +8,7 @@
  */
 export const env = {
   apiBaseUrl: import.meta.env.PUBLIC_API_BASE_URL ?? '',
+  // Yandex Metrica counter id. Empty (the default) disables analytics — the
+  // metrics layer no-ops and just logs events in dev. Set PUBLIC_YM_ID to enable.
+  yandexMetricaId: import.meta.env.PUBLIC_YM_ID ?? '',
 } as const;

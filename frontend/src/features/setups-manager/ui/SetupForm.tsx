@@ -12,6 +12,7 @@ import {
   type GeneratedVariant,
 } from '@/entities/setups';
 import { useTranslation } from '@/shared/i18n';
+import { useCounter, MetricEvents } from '@/shared/metrics';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
@@ -67,6 +68,7 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
 
   const generate = useGenerateSetup();
   const generatePack = useGenerateSetupPack();
+  const counter = useCounter();
   const carId = watch('carId');
   const trackId = watch('trackId');
 
@@ -81,10 +83,26 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
   };
 
   const onGenerate = () =>
-    generate.mutate({ carId, trackId }, { onSuccess: loadVariant });
+    generate.mutate(
+      { carId, trackId },
+      {
+        onSuccess: (gen) => {
+          loadVariant(gen);
+          counter(MetricEvents.baselineGenerated)({ carId, trackId });
+        },
+      },
+    );
 
   const onGeneratePack = () =>
-    generatePack.mutate({ carId, trackId }, { onSuccess: setPack });
+    generatePack.mutate(
+      { carId, trackId },
+      {
+        onSuccess: (variants) => {
+          setPack(variants);
+          counter(MetricEvents.packGenerated)({ carId, trackId, count: variants.length });
+        },
+      },
+    );
 
   // Save every variant in the pack (sequential; keeps whatever succeeded if one
   // fails). Public defaults off — the user shares individually afterwards.
@@ -102,6 +120,7 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
           public: false,
         });
       }
+      counter(MetricEvents.packSavedAll)({ carId, trackId, count: pack.length });
       setPack(null);
       reset();
       onCreated?.();
@@ -113,6 +132,7 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
   const onSubmit = handleSubmit((values) => {
     create.mutate(values, {
       onSuccess: () => {
+        counter(MetricEvents.setupSaved)({ carId: values.carId, public: values.public });
         reset();
         onCreated?.();
       },

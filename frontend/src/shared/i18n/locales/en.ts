@@ -195,6 +195,13 @@ export const en = {
     errNotes: 'Notes are too long (max 500 characters).',
     generate: 'Generate baseline',
     generateHint: 'Generate a starting setup for this car and track',
+    generatePack: 'Generate pack',
+    packHint:
+      'Generate a safe & pro setup for each session type (race, qual, endurance, rain)',
+    packTitle: 'Generated pack',
+    use: 'Use',
+    saveAll: 'Save all ({{n}})',
+    packClose: 'Dismiss pack',
   },
   goals: {
     title: 'Goal Tracker',

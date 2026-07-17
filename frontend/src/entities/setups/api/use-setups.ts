@@ -32,6 +32,13 @@ export interface GeneratedSetup {
   data: string;
 }
 
+/** One setup in a generated pack: a baseline plus the axes it was built for. */
+export interface GeneratedVariant extends GeneratedSetup {
+  skill: string; // "safe" | "pro"
+  session: string; // "endurance" | "race" | "qual" | "rain"
+  label: string; // e.g. "Pro · Qualifying"
+}
+
 /** Ask the backend for a generated baseline for a car+track combo. */
 export function useGenerateSetup() {
   return useMutation({
@@ -40,6 +47,17 @@ export function useGenerateSetup() {
         method: 'POST',
         body: JSON.stringify(input),
       }),
+  });
+}
+
+/** Ask the backend for a pack of setups (skill × session matrix) for a combo. */
+export function useGenerateSetupPack() {
+  return useMutation({
+    mutationFn: (input: { carId: number; trackId: number }) =>
+      apiFetch<{ variants: GeneratedVariant[] }>('/api/setups/generate/pack', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      }).then((r) => r.variants),
   });
 }
 

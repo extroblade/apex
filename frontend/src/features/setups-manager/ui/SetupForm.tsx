@@ -1,11 +1,16 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Wand2 } from 'lucide-react';
+import { Wand2, Layers, X } from 'lucide-react';
 
 import { useCars, useTracks } from '@/entities/planner';
-import { useCreateSetup, useGenerateSetup } from '@/entities/setups';
+import {
+  useCreateSetup,
+  useGenerateSetup,
+  useGenerateSetupPack,
+  type GeneratedVariant,
+} from '@/entities/setups';
 import { useTranslation } from '@/shared/i18n';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
@@ -61,20 +66,49 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
   });
 
   const generate = useGenerateSetup();
+  const generatePack = useGenerateSetupPack();
   const carId = watch('carId');
   const trackId = watch('trackId');
 
+  // The generated pack (skill × session variants) shown for review, if any.
+  const [pack, setPack] = useState<GeneratedVariant[] | null>(null);
+  const [savingAll, setSavingAll] = useState(false);
+
+  const loadVariant = (v: { name: string; notes: string; data: string }) => {
+    setValue('name', v.name, { shouldValidate: true });
+    setValue('notes', v.notes, { shouldValidate: true });
+    setValue('data', v.data, { shouldValidate: true });
+  };
+
   const onGenerate = () =>
-    generate.mutate(
-      { carId, trackId },
-      {
-        onSuccess: (gen) => {
-          setValue('name', gen.name, { shouldValidate: true });
-          setValue('notes', gen.notes, { shouldValidate: true });
-          setValue('data', gen.data, { shouldValidate: true });
-        },
-      },
-    );
+    generate.mutate({ carId, trackId }, { onSuccess: loadVariant });
+
+  const onGeneratePack = () =>
+    generatePack.mutate({ carId, trackId }, { onSuccess: setPack });
+
+  // Save every variant in the pack (sequential; keeps whatever succeeded if one
+  // fails). Public defaults off — the user shares individually afterwards.
+  const onSaveAll = async () => {
+    if (!pack) return;
+    setSavingAll(true);
+    try {
+      for (const v of pack) {
+        await create.mutateAsync({
+          name: v.name,
+          carId,
+          trackId,
+          notes: v.notes,
+          data: v.data,
+          public: false,
+        });
+      }
+      setPack(null);
+      reset();
+      onCreated?.();
+    } finally {
+      setSavingAll(false);
+    }
+  };
 
   const onSubmit = handleSubmit((values) => {
     create.mutate(values, {
@@ -194,9 +228,14 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
       {generate.error && (
         <p className="text-sm text-destructive">{(generate.error as Error).message}</p>
       )}
+      {generatePack.error && (
+        <p className="text-sm text-destructive">
+          {(generatePack.error as Error).message}
+        </p>
+      )}
 
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" disabled={create.isPending}>
+        <Button type="submit" disabled={create.isPending || savingAll}>
           {create.isPending ? t('common.loading') : t('setups.save')}
         </Button>
         <Button
@@ -209,7 +248,90 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
           <Wand2 className="size-4" />
           {generate.isPending ? t('common.loading') : t('setups.generate')}
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={!carId || generatePack.isPending}
+          title={carId ? t('setups.packHint') : t('setups.selectCar')}
+          onClick={onGeneratePack}
+        >
+          <Layers className="size-4" />
+          {generatePack.isPending ? t('common.loading') : t('setups.generatePack')}
+        </Button>
       </div>
+
+      {pack && pack.length > 0 && (
+        <PackPanel
+          pack={pack}
+          savingAll={savingAll}
+          onUse={loadVariant}
+          onSaveAll={onSaveAll}
+          onClose={() => setPack(null)}
+        />
+      )}
     </form>
+  );
+}
+
+/** Review panel for a generated pack: one card per variant, with per-variant
+ *  "Use" (load into the form) and a "Save all" convenience. */
+function PackPanel({
+  pack,
+  savingAll,
+  onUse,
+  onSaveAll,
+  onClose,
+}: {
+  pack: GeneratedVariant[];
+  savingAll: boolean;
+  onUse: (v: GeneratedVariant) => void;
+  onSaveAll: () => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="space-y-3 rounded-md border p-3">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-sm font-medium">{t('setups.packTitle')}</h3>
+        <div className="flex items-center gap-2">
+          <Button type="button" size="sm" disabled={savingAll} onClick={onSaveAll}>
+            {savingAll ? t('common.loading') : t('setups.saveAll', { n: pack.length })}
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label={t('setups.packClose')}
+            onClick={onClose}
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
+      </div>
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {pack.map((v) => (
+          <li
+            key={`${v.skill}-${v.session}`}
+            className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
+          >
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-medium">{v.label}</span>
+              <span className="block truncate text-xs text-muted-foreground">
+                {v.notes}
+              </span>
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={savingAll}
+              onClick={() => onUse(v)}
+            >
+              {t('setups.use')}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

@@ -160,6 +160,8 @@ Tip: `docker compose up db` to run just MySQL while developing the apps natively
 | GET    | `/api/planner/{cars,tracks,series}` | user | Catalog with owned/favorite flags |
 | PUT    | `/api/planner/{cars,tracks}/{id}` | user | Toggle owned (`{"owned":bool}`) |
 | PUT    | `/api/planner/series/{id}` | user | Toggle favorite (`{"favorite":bool}`) |
+| POST   | `/api/setups/generate` | user | Deterministic baseline setup for a car+track |
+| POST   | `/api/setups/generate/pack` | user | A pack of setups: skill (safe/pro) × session (endurance/race/qual/rain) |
 | GET/POST/DELETE | `/api/planner/plan[/{id}]` | user | Manual plan rows (series/track/car) |
 | GET    | `/api/drivers/search?q=` | user | Driver search (via your own linked session) |
 | GET    | `/api/drivers/{custId}` | user | Any driver's profile (cached 6h) |

@@ -102,9 +102,16 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
 - **Goal tracker** (`internal/goals`, `/api/goals`, `pages/goals`): personal
   numeric goals (target/current/unit, optional due date) with a progress bar;
   auto-completes at target, +/- quick-adjust, manual done toggle.
-- **Setup generator**: `POST /api/setups/generate` (`internal/setups/generator.go`)
-  builds a deterministic baseline from car discipline + track character; the
-  setup form's "Generate baseline" button prefills name/notes/data.
+- **Setup generator** (`internal/setups/generator.go`): deterministic, NOT
+  telemetry — car-discipline baseline + track-character tweak + optional
+  skill/session deltas, rendered to a plain-text `.sto`-ish file.
+  `POST /api/setups/generate` → one balanced baseline ("Generate baseline"
+  button). `POST /api/setups/generate/pack` → the **2×4 pack**: skill
+  (`safe`/`pro`) × session (`endurance`/`race`/`qual`/`rain`) = 8 variants
+  ("Generate pack" → review panel with per-variant "Use" + "Save all"). Both
+  share `computeSetup`/`render`; deltas live in `skillDeltas`/`sessionDeltas`
+  and only apply where the discipline has the field (an oval never grows a
+  wing/diff). `race` session = zero delta (the balanced centre).
 - **Forms** use `react-hook-form` + `zod` (`@hookform/resolvers/zod`) with a
   shared Radix `Select` (`shared/ui/select.tsx`), `Textarea`, and a
   `DatePicker` (`shared/ui/date-picker.tsx`, react-day-picker + Popover —

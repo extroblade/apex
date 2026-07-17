@@ -107,6 +107,26 @@ func (h *Handler) GenerateSetup(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, gen)
 }
 
+// GenerateSetupPack returns a pack of generated setups (skill × session matrix)
+// for a car+track combo — not saved; the client previews and saves the ones it
+// wants.
+func (h *Handler) GenerateSetupPack(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		CarID   int `json:"carId"`
+		TrackID int `json:"trackId"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.CarID <= 0 {
+		writeJSON(w, http.StatusBadRequest, errBody("carId is required"))
+		return
+	}
+	pack, err := h.Setups.GeneratePack(r.Context(), req.CarID, req.TrackID)
+	if err != nil {
+		writeJSON(w, setupStatus(err), errBody(err.Error()))
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"variants": pack})
+}
+
 // DeleteSetup removes a setup the caller owns.
 func (h *Handler) DeleteSetup(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFromContext(r.Context())

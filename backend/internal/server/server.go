@@ -103,6 +103,7 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 			r.Get("/", h.ListSetups)
 			r.Post("/", h.CreateSetup)
 			r.Post("/generate", h.GenerateSetup)
+			r.Post("/generate/pack", h.GenerateSetupPack)
 			r.Get("/{id}", h.GetSetup)
 			r.Put("/{id}/public", h.SetSetupPublic)
 			r.Delete("/{id}", h.DeleteSetup)

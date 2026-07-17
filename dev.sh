@@ -17,6 +17,7 @@ NET="apex-net"
 BACKEND="$ROOT/backend/docker-compose.yml"
 STATIC="$ROOT/static/docker-compose.yml"
 NAV="$ROOT/nav/docker-compose.yml"
+BFF="$ROOT/bff/docker-compose.yml"
 FRONTEND="$ROOT/frontend/docker-compose.yml"
 
 ensure_network() {
@@ -49,25 +50,30 @@ case "$cmd" in
     docker compose -f "$STATIC" up -d --build
     echo "› starting nav (menu config)"
     docker compose -f "$NAV" up -d --build
+    echo "› starting bff (mobile backend-for-frontend)"
+    docker compose -f "$BFF" up -d --build
     echo "› starting frontend"
     docker compose -f "$FRONTEND" up -d --build
     echo
     echo "  frontend → http://localhost:3000"
     echo "  api      → http://localhost:8080/api/health"
+    echo "  bff      → http://localhost:8083/bff/health"
     ;;
   down)
     docker compose -f "$FRONTEND" down
+    docker compose -f "$BFF" down
     docker compose -f "$NAV" down
     docker compose -f "$STATIC" down
     docker compose -f "$BACKEND" down
     ;;
   logs)
-    docker compose -f "$BACKEND" -f "$STATIC" -f "$NAV" -f "$FRONTEND" logs -f --tail=100
+    docker compose -f "$BACKEND" -f "$STATIC" -f "$NAV" -f "$BFF" -f "$FRONTEND" logs -f --tail=100
     ;;
   ps)
     docker compose -f "$BACKEND" ps
     docker compose -f "$STATIC" ps
     docker compose -f "$NAV" ps
+    docker compose -f "$BFF" ps
     docker compose -f "$FRONTEND" ps
     ;;
   *)

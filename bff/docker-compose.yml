@@ -1,0 +1,22 @@
+# BFF (Backend-for-Frontend) for the future mobile app: reshapes the Go API's
+# data for mobile. Self-contained so it can move to its own repo later; joins the
+# shared external `apex-net` so it can reach the backend by name. It owns no data
+# and no auth — it forwards the caller's auth to the Go API.
+name: apex-bff
+
+services:
+  bff:
+    build: .
+    restart: unless-stopped
+    environment:
+      PORT: "8083"
+      API_BASE_URL: http://backend:8080
+      NAV_BASE_URL: http://nav:8081
+    ports:
+      - "8083:8083"
+    networks:
+      - apex-net
+
+networks:
+  apex-net:
+    external: true

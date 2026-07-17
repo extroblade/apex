@@ -14,13 +14,17 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
   `/avatars`; regenerate with `node static/generate-avatars.mjs`).
 - `nav/` — **menu service** (own Go module, own compose project): owns the
   `nav_items` table and serves `GET /api/nav`. See "Backend-driven navigation".
-- The four are **separate compose projects** joined by the external `apex-net`
+- `bff/` — **mobile Backend-for-Frontend** (NestJS, own compose project): reshapes
+  the Go API + nav for a future mobile app. Owns no data/auth — forwards the
+  caller's auth. `GET /bff/home` (aggregated+gated), `/bff/health`, `/metrics`.
+  Web app does NOT use it; the mobile app hits it directly on :8083.
+- The compose projects are **separate**, joined by the external `apex-net`
   network. Frontend nginx proxies `/api/nav` → nav, `/api` → backend, and
   `/media` → static, and caches (`media_cache` 7d, `/api/features` 30s).
   `/api/nav` is a LONGER prefix than `/api/`, which is how nginx splits them —
   keep that ordering. `/static` is rsbuild's OWN bundle path — never proxy it.
 - `./dev.sh up|down|logs|ps` runs the whole stack (frontend :3000, api :8080,
-  mysql :3306).
+  bff :8083, mysql :3306).
 
 ## Feature flags & the no-iRacing planner
 
@@ -178,6 +182,20 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
   timeout + no retries so a dead Redis never stalls a request. Feature flags read
   through it (30s TTL, key `features:flags`); the Cockpit toggle invalidates it.
   `REDIS_ADDR` empty disables it. Catalog reads are NOT cached yet (roadmap).
+- **Metrics**: provider-agnostic. FRONTEND — `shared/metrics`: `useCounter()`
+  returns the curried `counter('event')(params)`; default provider is Yandex
+  Metrica (`reachGoal`, id from `PUBLIC_YM_ID` — EMPTY for now, so it no-ops and
+  just `devlog`s). Known events in `MetricEvents`, but any string works. BACKEND
+  & BFF — Prometheus (`internal/metrics` in Go, `src/metrics` in the BFF): request
+  middleware (labeled by route PATTERN, not raw path), a `/metrics` exposition
+  endpoint (root, unproxied → internal scrape only), and a generic
+  `Count(name, help, labels)` domain counter mirroring the frontend helper.
+- **BFF** (`bff/`, NestJS): the mobile edge. `UpstreamService` forwards the
+  caller's cookie/bearer to the Go API (`API_BASE_URL`) and nav (`NAV_BASE_URL`)
+  — it knows the topology since nginx isn't in front of it. `HomeService.home()`
+  fans out to me+nav+features and does the nav gating server-side (so the app
+  doesn't reimplement `visibleNav`), returning one mobile-shaped payload. Jest
+  unit (mocked upstream) + supertest e2e; own `bff-ci`.
 
 ## Roadmap / staged next (agreed with the user)
 
@@ -188,16 +206,13 @@ series→car mapping (`series_cars` in the seed), **catalog image rehosting +
 description backfill**, **Cockpit dev overlay**, **Redis cache (fail-open)**,
 **backend-driven navigation** (nav service + side menu + minimal header),
 **setup pack generator** (2×4 skill×session), **backend-driven i18n** (locales
-service + DB-served bundles).
+service + DB-served bundles), **metrics** (frontend counterHelper + Prometheus on
+backend & BFF), **BFF** (NestJS mobile Backend-for-Frontend).
 
-1. **BFF (NestJS)** for a future mobile app: a Backend-for-Frontend that reshapes
-   the Go API's data for mobile (own compose project on `apex-net`, like `nav/`).
-   Design first — don't ad-hoc it.
-2. **Metrics**: a universal, provider-agnostic counter across all tiers. Frontend
-   `counterHelper('event')(params)` (default provider Yandex Metrica, key from
-   ENV — left empty for now); backend + BFF get their own metrics too.
-3. Edit `nav_items` from the Cockpit (the menu is DB-driven; the UI is missing).
-4. Track layout art (generated SVGs in `static/`).
-5. Microfrontend split (module federation) — design first, don't ad-hoc it.
-6. Extend the Redis cache to catalog reads (cars/tracks/series). Today only the
+1. Edit `nav_items` from the Cockpit (the menu is DB-driven; the UI is missing).
+2. Track layout art (generated SVGs in `static/`).
+3. Microfrontend split (module federation) — design first, don't ad-hoc it.
+4. Extend the Redis cache to catalog reads (cars/tracks/series). Today only the
    feature flags go through `internal/cache`; catalog reads still hit MySQL.
+5. Grow the BFF as the mobile app's needs become concrete (only `/bff/home` +
+   health exist today).

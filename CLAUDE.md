@@ -127,7 +127,10 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
   description='' AND detail_url<>''), INDEPENDENT of the content-hash guard.
 - **Cockpit dev overlay** (`internal/handler/cockpit.go`, `features/cockpit`):
   `?dev=KEY` sets a `developer` cookie (`?dev=off` clears it; handled in
-  `app/index.tsx`). Backend `DEVELOPER_KEY` env gates it — empty = all off.
+  `app/index.tsx`). Backend `DEVELOPER_KEY` env gates it — empty = all off;
+  `backend/docker-compose.yml` defaults it to **`3`**, so the overlay works in
+  any environment the stack starts via **`?dev=3`** (documented in the README's
+  "Cockpit" section; override it for a public deploy).
   `GET /api/features/all`, `PUT /api/features/{key}`, `GET /api/health/cockpit`
   return 404 unless the cookie matches (cookie is the ONLY gate — no feature-flag
   gate, that'd be chicken-and-egg). The `cockpit` flag (migration 0021, seeded

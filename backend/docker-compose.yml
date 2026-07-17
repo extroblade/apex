@@ -53,9 +53,12 @@ services:
       CORS_ORIGIN: "*"
       # Redis cache (fail-open). Point at the redis service; unset to disable.
       REDIS_ADDR: "redis:6379"
-      # Cockpit dev-overlay key. Set to enable runtime flag toggles; the frontend
-      # opts in with ?dev=<key>. Empty disables Cockpit entirely.
-      DEVELOPER_KEY: "${DEVELOPER_KEY:-}"
+      # Cockpit dev-overlay key: open the app with ?dev=<key> to unlock it.
+      # Defaults to "3" so the overlay works out of the box in any environment
+      # this compose starts. Empty disables Cockpit entirely.
+      # SECURITY: "3" is a convenience default — anyone who knows it can toggle
+      # your feature flags. Override DEVELOPER_KEY for any public deploy.
+      DEVELOPER_KEY: "${DEVELOPER_KEY:-3}"
       # Dev-only key so the iRacing integration is enabled out of the box.
       # Generate your own for anything real: head -c 32 /dev/urandom | base64
       APP_ENCRYPTION_KEY: "BBaagx7zSXl/MbrekQWYgNPMOQhTsNt7IvRsSIUvctA="

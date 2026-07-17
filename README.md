@@ -168,15 +168,41 @@ bytes), `IRACING_CLIENT_ID`, `IRACING_OAUTH_REDIRECT_URI` (and
 `IRACING_CLIENT_SECRET` if issued). Without these, the `/api/iracing`,
 `/api/drivers`, `/api/compare`, and `/api/planner` routes return 503.
 
-**Cockpit dev overlay** — open any page with `?dev=<DEVELOPER_KEY>` to store a
-`developer` cookie (`?dev=off` clears it). When it matches the backend
-`DEVELOPER_KEY` env, a floating wrench button opens a modal to toggle feature
-flags at runtime and view backend health. All cockpit endpoints 404 without the
-matching cookie; leave `DEVELOPER_KEY` empty to disable it entirely.
-
 Other env: `REDIS_ADDR` (e.g. `redis:6379`; empty = cache disabled, fail-open)
 and `CATALOG_IMAGE_DIR` (scheduler; the shared media-volume root, `/media-data`
 in Docker) — see `backend/.env.example`.
+
+## Cockpit (dev overlay)
+
+A dev-only overlay to flip **feature flags at runtime** and read backend health,
+without a redeploy or a DB query. It works in **any environment** — the only gate
+is a `developer` cookie that matches the backend's `DEVELOPER_KEY`.
+
+**How to open it:**
+
+1. Start the stack — `./dev.sh up`.
+2. Visit **<http://localhost:3000/?dev=3>** — the `?dev=` param stores the
+   `developer` cookie and is then stripped from the URL.
+3. A **wrench button** appears (bottom-right, floating). Click it: you get every
+   feature flag with a live toggle, plus DB + Redis health.
+4. Visit any page with **`?dev=off`** to clear the cookie and hide it again.
+
+The key comes from the backend `DEVELOPER_KEY` env, which the Docker stack
+defaults to `3` — hence `?dev=3`. Set your own to change it:
+
+```bash
+DEVELOPER_KEY=my-secret docker compose -f backend/docker-compose.yml up -d backend
+# → then open http://localhost:3000/?dev=my-secret
+```
+
+Without a matching cookie, `GET /api/features/all`, `PUT /api/features/{key}`,
+and `GET /api/health/cockpit` all return **404** (they don't exist as far as any
+other client can tell), and the frontend renders no button at all. Setting
+`DEVELOPER_KEY=` (empty) disables Cockpit entirely.
+
+> **Security:** `3` is a convenience default for local development. Anyone who
+> knows the key can toggle your feature flags, so set a long random
+> `DEVELOPER_KEY` for any publicly reachable deploy.
 
 ### Phases
 

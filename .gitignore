@@ -4,3 +4,5 @@
 .idea/
 .claude
 .zcode
+# `go build ./...` in nav/ drops the compiled binary next to the sources.
+/nav/apexnav

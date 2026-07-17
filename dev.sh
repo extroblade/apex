@@ -16,6 +16,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NET="apex-net"
 BACKEND="$ROOT/backend/docker-compose.yml"
 STATIC="$ROOT/static/docker-compose.yml"
+NAV="$ROOT/nav/docker-compose.yml"
 FRONTEND="$ROOT/frontend/docker-compose.yml"
 
 ensure_network() {
@@ -46,6 +47,8 @@ case "$cmd" in
     docker compose -f "$BACKEND" up -d --build
     echo "› starting static (avatars)"
     docker compose -f "$STATIC" up -d --build
+    echo "› starting nav (menu config)"
+    docker compose -f "$NAV" up -d --build
     echo "› starting frontend"
     docker compose -f "$FRONTEND" up -d --build
     echo
@@ -54,15 +57,17 @@ case "$cmd" in
     ;;
   down)
     docker compose -f "$FRONTEND" down
+    docker compose -f "$NAV" down
     docker compose -f "$STATIC" down
     docker compose -f "$BACKEND" down
     ;;
   logs)
-    docker compose -f "$BACKEND" -f "$STATIC" -f "$FRONTEND" logs -f --tail=100
+    docker compose -f "$BACKEND" -f "$STATIC" -f "$NAV" -f "$FRONTEND" logs -f --tail=100
     ;;
   ps)
     docker compose -f "$BACKEND" ps
     docker compose -f "$STATIC" ps
+    docker compose -f "$NAV" ps
     docker compose -f "$FRONTEND" ps
     ;;
   *)

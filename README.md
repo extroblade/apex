@@ -6,10 +6,11 @@ React + TypeScript frontend. Everything is Dockerized.
 
 - **Backend** — Go 1.25, [chi](https://github.com/go-chi/chi) router, `database/sql` + MySQL driver. HTTP API + a daily schedule-sync scheduler.
 - **Frontend** — React + TypeScript, built with [rsbuild](https://rsbuild.dev). Routing via [wouter](https://github.com/molefrog/wouter), client state via [zustand](https://zustand.docs.pmnd.rs), server state via [TanStack Query](https://tanstack.com/query), UI via [shadcn/ui](https://ui.shadcn.com) + Tailwind CSS v4. Organized with [Feature-Sliced Design](https://feature-sliced.design).
+- **Nav** — a small standalone Go service that owns the app's **menu configuration** (`nav_items`) and serves it at `/api/nav`, so navigation is data on the backend rather than hard-coded in the SPA. It needs only MySQL: it serves the menu plus each item's `requiresAuth`/`featureFlag` metadata and lets the client (which already holds the viewer and the flags) filter — navigation isn't a security boundary, since every API route enforces its own auth.
 - **Static** — nginx serving generated default avatars, exported i18n locales, and rehosted catalog images (`/media/catalog/*`) from the shared `apex-media-data` volume the scheduler writes to.
 - **Database** — MySQL 8.4 (Dockerized).
 - **Cache** — Redis 7 (Dockerized, no external port). A strictly **fail-open** wrapper (`internal/cache`): if Redis is unset or down, reads fall through to MySQL with no error and no stall (300ms op timeout, no retries). Caches feature flags today.
-- **Docker** — the backend (`backend/docker-compose.yml`), frontend (`frontend/docker-compose.yml`), and static (`static/docker-compose.yml`) are **separate compose projects** joined by a shared external network, so each can be split into its own repo later. `./dev.sh` runs all three with one command.
+- **Docker** — the backend (`backend/docker-compose.yml`), frontend (`frontend/docker-compose.yml`), static (`static/docker-compose.yml`), and nav (`nav/docker-compose.yml`) are **separate compose projects** joined by a shared external network, so each can be split into its own repo later. `./dev.sh` runs them all with one command.
 
 ## Layout
 
@@ -47,12 +48,12 @@ React + TypeScript frontend. Everything is Dockerized.
 │   │   ├── pages/            # home, fuel, planner, this-week, garage, setups,
 │   │   │                     # goals, dashboard, drivers, driver-profile,
 │   │   │                     # compare, profile, login, about
-│   │   ├── widgets/          # header, bottom-nav, user-menu
+│   │   ├── widgets/          # header (minimal), side-nav, bottom-nav, user-menu
 │   │   ├── features/         # auth, fuel-calculator, season-planner,
 │   │   │                     # manage-content, setups-manager, goal-tracker,
 │   │   │                     # link-iracing, profile, customize-theme
 │   │   ├── entities/         # viewer, planner, setups, goals, driver,
-│   │   │                     # iracing, features
+│   │   │                     # iracing, features, nav
 │   │   └── shared/           # ui (shadcn), lib (cn), api, config, i18n, theme
 │   ├── e2e/                  # Playwright specs
 │   ├── rsbuild.config.ts
@@ -60,7 +61,11 @@ React + TypeScript frontend. Everything is Dockerized.
 │   ├── docker-compose.yml    # frontend project
 │   └── Dockerfile
 ├── static/                   # nginx: avatars + exported locales
-├── dev.sh                    # runs all three projects together
+├── nav/                      # menu service (own Go module + compose project)
+│   ├── main.go               # GET /api/nav
+│   ├── migrate.go            # owns + seeds the nav_items table
+│   └── docker-compose.yml
+├── dev.sh                    # runs all the projects together
 └── .github/workflows/        # CI/CD (backend-ci, frontend-ci, e2e)
 ```
 
@@ -95,6 +100,7 @@ GitHub Actions (in `.github/workflows/`) runs on every push to `main` and PR:
 | Workflow | What it does |
 | -------- | ------------ |
 | `backend-ci` | `gofmt`, `go vet`, `go test -race -cover`. On `main`/tags, builds & pushes `ghcr.io/<owner>/apex-backend`. |
+| `nav-ci` | Same checks for the nav service. On `main`/tags, builds & pushes `ghcr.io/<owner>/apex-nav`. |
 | `frontend-ci` | `tsc` typecheck, ESLint, Prettier check, Vitest, production build. On `main`/tags, builds & pushes `ghcr.io/<owner>/apex-frontend`. |
 | `e2e` | Brings up the full stack (MySQL + backend + static + frontend) via the existing compose files and runs the Playwright suite. Uploads the HTML report as an artifact. |
 
@@ -131,6 +137,7 @@ Tip: `docker compose up db` to run just MySQL while developing the apps natively
 | ------ | --------------------- | ---- | ------------------------------------ |
 | GET    | `/api/health`         | —    | Liveness + DB connectivity           |
 | GET    | `/api/features`       | —    | Public feature-flag map              |
+| GET    | `/api/nav`            | —    | Menu config (nav service) — items + placement/gating metadata |
 | POST   | `/api/fuel/plan`      | —    | Compute a fuel & stint strategy      |
 | GET    | `/api/features/all`   | dev cookie | Cockpit: all flags (404 unless `developer` cookie = `DEVELOPER_KEY`) |
 | PUT    | `/api/features/{key}` | dev cookie | Cockpit: toggle a flag (`{"enabled":bool}`) |
@@ -171,6 +178,36 @@ bytes), `IRACING_CLIENT_ID`, `IRACING_OAUTH_REDIRECT_URI` (and
 Other env: `REDIS_ADDR` (e.g. `redis:6379`; empty = cache disabled, fail-open)
 and `CATALOG_IMAGE_DIR` (scheduler; the shared media-volume root, `/media-data`
 in Docker) — see `backend/.env.example`.
+
+## Menu (nav service)
+
+The navigation is **configuration, not code**. The `nav` service owns the
+`nav_items` table (it creates and seeds it on startup) and serves it at
+`/api/nav`; the SPA renders whatever it gets — a side menu on desktop, the
+bottom bar on mobile (`placements`), ordered by `sort_order`.
+
+Each row carries its own gating metadata, which the client applies:
+
+| column | meaning |
+| ------ | ------- |
+| `placements` | `side` and/or `bottom` (comma-separated) |
+| `sort_order` | order within a placement |
+| `requires_auth` | hide from logged-out visitors |
+| `feature_flag` | hide unless that flag is on (e.g. `iracing_oauth`); empty = always |
+| `enabled` | soft on/off switch |
+| `label_key` | an **i18n key** (`nav.planner`), not text |
+| `icon` | a lucide **name**, resolved through a whitelist on the client |
+
+Until the Cockpit gets an editor (roadmap), change it with SQL — no redeploy,
+no frontend build:
+
+```sql
+-- hide an item, move another to the top
+UPDATE nav_items SET enabled = 0    WHERE item_key = 'compare';
+UPDATE nav_items SET sort_order = 5 WHERE item_key = 'goals';
+```
+
+The seed uses `INSERT IGNORE`, so restarts never clobber your edits.
 
 ## Cockpit (dev overlay)
 

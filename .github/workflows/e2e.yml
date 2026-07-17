@@ -37,6 +37,11 @@ jobs:
       - name: start static (avatars)
         run: docker compose -f static/docker-compose.yml up -d --build
 
+      # The SPA's menu comes from this service — without it /api/nav 502s and
+      # there is no navigation to assert on.
+      - name: start nav (menu config)
+        run: docker compose -f nav/docker-compose.yml up -d --build
+
       - name: start frontend
         run: docker compose -f frontend/docker-compose.yml up -d --build
 
@@ -83,4 +88,5 @@ jobs:
         if: ${{ failure() }}
         run: |
           docker compose -f backend/docker-compose.yml logs backend || true
+          docker compose -f nav/docker-compose.yml logs nav || true
           docker compose -f frontend/docker-compose.yml logs frontend || true

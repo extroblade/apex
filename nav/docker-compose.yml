@@ -1,0 +1,23 @@
+# Nav service: owns the app's menu config (nav_items) and serves it at /api/nav.
+# Self-contained so it can move to its own repo later; joins the shared external
+# `apex-net` network so the frontend's nginx can proxy /api/nav to it by name.
+# No external port — only the frontend proxy talks to it.
+name: apex-nav
+
+services:
+  nav:
+    build: .
+    restart: unless-stopped
+    environment:
+      PORT: "8081"
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USER: app
+      DB_PASSWORD: app
+      DB_NAME: app
+    networks:
+      - apex-net
+
+networks:
+  apex-net:
+    external: true

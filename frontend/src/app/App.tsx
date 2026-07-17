@@ -1,6 +1,7 @@
 import { AppProviders } from './providers';
 import { AppRouter } from './providers/router';
 import { Header } from '@/widgets/header';
+import { SideNav } from '@/widgets/side-nav';
 import { BottomNav } from '@/widgets/bottom-nav';
 import { Cockpit } from '@/features/cockpit';
 
@@ -16,9 +17,15 @@ export function App() {
           Skip to content
         </a>
         <Header />
-        <main id="main" className="mx-auto max-w-6xl px-4 py-8 pb-24 md:pb-8">
-          <AppRouter />
-        </main>
+        <div className="flex">
+          {/* Desktop navigation; the bottom bar takes over below md. */}
+          <SideNav />
+          <main id="main" className="min-w-0 flex-1 px-4 py-8 pb-24 md:pb-8">
+            <div className="mx-auto max-w-6xl">
+              <AppRouter />
+            </div>
+          </main>
+        </div>
         <BottomNav />
         {/* Dev-only overlay; renders nothing without the `developer` cookie. */}
         <Cockpit />

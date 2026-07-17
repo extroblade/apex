@@ -12,10 +12,13 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
 - `frontend/` — React SPA (FSD under `src/`). See `frontend/CLAUDE.md`.
 - `static/` — nginx serving generated assets (8 default avatars under
   `/avatars`; regenerate with `node static/generate-avatars.mjs`).
-- The three are **separate compose projects** joined by the external `apex-net`
-  network. Frontend nginx proxies `/api` → backend and `/media` → static, and
-  caches (`media_cache` 7d, `/api/features` 30s). `/static` is rsbuild's OWN
-  bundle path — never proxy it.
+- `nav/` — **menu service** (own Go module, own compose project): owns the
+  `nav_items` table and serves `GET /api/nav`. See "Backend-driven navigation".
+- The four are **separate compose projects** joined by the external `apex-net`
+  network. Frontend nginx proxies `/api/nav` → nav, `/api` → backend, and
+  `/media` → static, and caches (`media_cache` 7d, `/api/features` 30s).
+  `/api/nav` is a LONGER prefix than `/api/`, which is how nginx splits them —
+  keep that ordering. `/static` is rsbuild's OWN bundle path — never proxy it.
 - `./dev.sh up|down|logs|ps` runs the whole stack (frontend :3000, api :8080,
   mysql :3306).
 
@@ -137,6 +140,21 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
   off) is just a normal togglable flag now. Frontend: floating wrench button
   (visible only when `isDev()`) opens a Radix Dialog listing flags with toggles +
   a health readout; `shared/lib/dev.ts` (`isDev`, `devlog` no-op without cookie).
+- **Backend-driven navigation** (`nav/` service, `entities/nav`,
+  `widgets/side-nav` + `widgets/bottom-nav`): the menu is DATA, not hard-coded.
+  The nav service owns `nav_items` (`item_key, label_key, href, icon,
+  placements, sort_order, requires_auth, feature_flag, enabled`), creates+seeds
+  it itself on startup (`INSERT IGNORE`, so Cockpit edits are never clobbered),
+  and serves `GET /api/nav`. It deliberately does NOT read sessions or feature
+  flags: it ships the whole menu plus gating metadata, and the **client filters**
+  (`visibleNav()` by placement + `requiresAuth` + `featureFlag`) since it already
+  has the viewer and flags. Nav is not a security boundary — routes enforce their
+  own auth — which is what keeps this service dependency-free (MySQL only).
+  Labels are **i18n keys** (`nav.planner`), never text; icons are **names**
+  mapped through a whitelist (`entities/nav/ui/NavIcon.tsx`, unknown → dot).
+  Layout: desktop = side menu (`hidden md:block`), mobile = bottom bar
+  (`md:hidden`, max 5 slots, overflow folds into "More"); the **header is
+  minimal** (brand + user menu only, on every viewport).
 - **Redis cache** (`internal/cache`, `redis:7-alpine`, no external port): a
   strictly **fail-open** go-redis v9 wrapper — nil client / downed Redis / miss
   all fall through to MySQL with NO error surfaced, and every op has a 300ms
@@ -150,9 +168,16 @@ Done recently: planner redesign (grid + this-week page + access colors), free/pa
 content model + track dedup, content sync (JSON list + iRacing web catalog),
 setups showroom, goal tracker, forms on zod + react-hook-form, precise
 series→car mapping (`series_cars` in the seed), **catalog image rehosting +
-description backfill**, **Cockpit dev overlay**, **Redis cache (fail-open)**.
+description backfill**, **Cockpit dev overlay**, **Redis cache (fail-open)**,
+**backend-driven navigation** (nav service + side menu + minimal header).
 
-1. Track layout art (generated SVGs in `static/`).
-2. Microfrontend split (module federation) — design first, don't ad-hoc it.
-3. Extend the Redis cache to catalog reads (cars/tracks/series). Today only the
+1. **Backend-driven i18n**: the locale list is still generated FROM the frontend
+   at build time (`gen-locales.mjs` → `static/locales/index.json`), so a new
+   language needs a frontend deploy. Move the list + bundles to the backend
+   (`GET /api/locales`, `GET /api/locales/{code}`) and keep `en` bundled as the
+   instant fallback AND the source of the `Translation` type (agreed with user).
+2. Edit `nav_items` from the Cockpit (the menu is DB-driven; the UI is missing).
+3. Track layout art (generated SVGs in `static/`).
+4. Microfrontend split (module federation) — design first, don't ad-hoc it.
+5. Extend the Redis cache to catalog reads (cars/tracks/series). Today only the
    feature flags go through `internal/cache`; catalog reads still hit MySQL.

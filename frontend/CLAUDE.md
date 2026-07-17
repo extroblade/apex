@@ -4,11 +4,19 @@ React 18 + TypeScript, built with **rsbuild**. Routing: wouter. Server state:
 TanStack Query. Client state: zustand. UI: shadcn/ui + Tailwind CSS v4 + clsx.
 
 Brand is **Apex** (`t('brand')`; logo `shared/ui/logo.tsx`; favicon in
-`public/`). Navigation: desktop = top header nav (`widgets/header`); mobile
-(<md) = Instagram-style bottom bar (`widgets/bottom-nav`). Bottom-bar rules:
-**max 5 buttons**; fold into a right-side "More" only when 2+ items overflow;
-the **profile/user menu stays in the header on all viewports** (never in the
-bar). Keep `main` padded (`pb-24 md:pb-8`) so the bar never covers content.
+`public/`).
+
+**Navigation is backend-driven** — it comes from the nav service (`GET /api/nav`,
+`entities/nav`), so never hard-code menu items here. Desktop = side menu
+(`widgets/side-nav`, `hidden md:block`); mobile (<md) = Instagram-style bottom
+bar (`widgets/bottom-nav`). The **header (`widgets/header`) is minimal**: brand +
+user menu only, no nav. Filter items with `visibleNav(items, placement, {isAuthed,
+flags})` — the service ships the whole menu + gating metadata and the client
+decides. Labels are i18n KEYS (`t(item.labelKey)`); icons are names resolved by
+`<NavIcon name={item.icon} />`. Bottom-bar rules: **max 5 buttons**, overflow
+folds into a right-side "More"; the **profile/user menu stays in the header on
+all viewports** (never in the bar). Keep `main` padded (`pb-24 md:pb-8`) so the
+bar never covers content.
 
 Locales: bundled `en`+`ru` in `shared/i18n/locales/*.ts` are the source of
 truth; `npm run gen:locales` (part of `npm run build`) exports them + a

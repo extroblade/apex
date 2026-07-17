@@ -1,69 +1,36 @@
 import { useState } from 'react';
 import { Link, useLocation, useRoute } from 'wouter';
-import {
-  Home,
-  Fuel,
-  CalendarRange,
-  Warehouse,
-  Wrench,
-  Target,
-  Users,
-  Gauge,
-  BarChart3,
-  MoreHorizontal,
-  type LucideIcon,
-} from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 
 import { useViewer } from '@/entities/viewer';
-import { useFeature, IRACING_OAUTH } from '@/entities/features';
+import { useFeatures } from '@/entities/features';
+import { useNav, visibleNav, NavIcon, type NavItem } from '@/entities/nav';
 import { useTranslation } from '@/shared/i18n';
 import { cn } from '@/shared/lib/utils';
-
-interface NavItem {
-  href: string;
-  label: string;
-  Icon: LucideIcon;
-}
 
 // The bar shows at most 5 buttons. Profile lives in the header, not here.
 const MAX_SLOTS = 5;
 
 /**
- * Instagram-style mobile bottom bar (hidden on md+). Everything that doesn't
- * fit into the 5 slots goes behind a right-side "More" button — unless only a
- * single item would overflow, in which case it's shown directly (no More).
+ * Instagram-style mobile bottom bar (hidden on md+). Which items appear — and
+ * in what order — is configured on the backend (the nav service, "bottom"
+ * placement); anything that doesn't fit the 5 slots folds behind a "More"
+ * button.
  */
 export function BottomNav() {
+  const { data: items = [] } = useNav();
   const { data: viewer } = useViewer();
-  const iracing = useFeature(IRACING_OAUTH);
+  const { data: flags = {} } = useFeatures();
   const { t } = useTranslation();
   const [moreOpen, setMoreOpen] = useState(false);
   const [location] = useLocation();
 
-  const items: NavItem[] = [
-    { href: '/', label: t('nav.home'), Icon: Home },
-    { href: '/fuel', label: t('nav.fuel'), Icon: Fuel },
-    ...(viewer
-      ? [
-          { href: '/planner', label: t('nav.planner'), Icon: CalendarRange },
-          { href: '/garage', label: t('nav.garage'), Icon: Warehouse },
-          { href: '/setups', label: t('nav.setups'), Icon: Wrench },
-          { href: '/goals', label: t('nav.goals'), Icon: Target },
-        ]
-      : []),
-    ...(viewer && iracing
-      ? [
-          { href: '/drivers', label: t('nav.drivers'), Icon: Users },
-          { href: '/dashboard', label: t('nav.dashboard'), Icon: Gauge },
-          { href: '/compare', label: t('nav.compare'), Icon: BarChart3 },
-        ]
-      : []),
-  ];
+  const links = visibleNav(items, 'bottom', { isAuthed: Boolean(viewer), flags });
 
-  // Fit everything if possible; only fold into "More" when 2+ items overflow.
-  const needsMore = items.length > MAX_SLOTS;
-  const primary = needsMore ? items.slice(0, MAX_SLOTS - 1) : items;
-  const overflow = needsMore ? items.slice(MAX_SLOTS - 1) : [];
+  // Fit everything if possible; otherwise keep a slot for "More".
+  const needsMore = links.length > MAX_SLOTS;
+  const primary = needsMore ? links.slice(0, MAX_SLOTS - 1) : links;
+  const overflow = needsMore ? links.slice(MAX_SLOTS - 1) : [];
   const overflowActive = overflow.some((i) => i.href === location);
 
   return (
@@ -75,11 +42,7 @@ export function BottomNav() {
         <div className="border-b">
           <div className="mx-auto grid max-w-md grid-cols-4 gap-1 p-2">
             {overflow.map((item) => (
-              <BarLink
-                key={item.href}
-                item={item}
-                onNavigate={() => setMoreOpen(false)}
-              />
+              <BarLink key={item.key} item={item} onNavigate={() => setMoreOpen(false)} />
             ))}
           </div>
         </div>
@@ -87,7 +50,7 @@ export function BottomNav() {
 
       <div className="mx-auto flex h-16 max-w-md items-stretch justify-around px-2 pb-[env(safe-area-inset-bottom)]">
         {primary.map((item) => (
-          <BarLink key={item.href} item={item} onNavigate={() => setMoreOpen(false)} />
+          <BarLink key={item.key} item={item} onNavigate={() => setMoreOpen(false)} />
         ))}
 
         {overflow.length > 0 && (
@@ -112,7 +75,7 @@ export function BottomNav() {
 
 function BarLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
   const [isActive] = useRoute(item.href);
-  const { Icon } = item;
+  const { t } = useTranslation();
   return (
     <Link
       href={item.href}
@@ -123,8 +86,8 @@ function BarLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }
         isActive ? 'text-foreground' : 'text-muted-foreground',
       )}
     >
-      <Icon className="size-5" aria-hidden />
-      {item.label}
+      <NavIcon name={item.icon} className="size-5" />
+      {t(item.labelKey)}
     </Link>
   );
 }

@@ -59,9 +59,10 @@ services:
       # SECURITY: "3" is a convenience default — anyone who knows it can toggle
       # your feature flags. Override DEVELOPER_KEY for any public deploy.
       DEVELOPER_KEY: "${DEVELOPER_KEY:-3}"
-      # Dev-only key so the iRacing integration is enabled out of the box.
-      # Generate your own for anything real: head -c 32 /dev/urandom | base64
-      APP_ENCRYPTION_KEY: "BBaagx7zSXl/MbrekQWYgNPMOQhTsNt7IvRsSIUvctA="
+      # Encrypts stored iRacing refresh tokens at rest (AES-256-GCM). Empty =
+      # iRacing linking stays disabled (it's flag-gated off anyway). NEVER commit
+      # a real key — set it in a gitignored .env: head -c 32 /dev/urandom | base64
+      APP_ENCRYPTION_KEY: "${APP_ENCRYPTION_KEY:-}"
       # Fill these after registering an OAuth app with iRacing to enable linking.
       IRACING_CLIENT_ID: "${IRACING_CLIENT_ID:-}"
       IRACING_CLIENT_SECRET: "${IRACING_CLIENT_SECRET:-}"

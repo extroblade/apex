@@ -207,12 +207,36 @@ description backfill**, **Cockpit dev overlay**, **Redis cache (fail-open)**,
 **backend-driven navigation** (nav service + side menu + minimal header),
 **setup pack generator** (2×4 skill×session), **backend-driven i18n** (locales
 service + DB-served bundles), **metrics** (frontend counterHelper + Prometheus on
-backend & BFF), **BFF** (NestJS mobile Backend-for-Frontend).
+backend & BFF), **BFF** (NestJS mobile Backend-for-Frontend), **legal/IP hygiene
+slice 1** (MIT LICENSE, iRacing non-affiliation disclaimer, `IRACING_SCRAPE` gate
+default-OFF, committed AES key removed).
 
-1. Edit `nav_items` from the Cockpit (the menu is DB-driven; the UI is missing).
-2. Track layout art (generated SVGs in `static/`).
-3. Microfrontend split (module federation) — design first, don't ad-hoc it.
-4. Extend the Redis cache to catalog reads (cars/tracks/series). Today only the
-   feature flags go through `internal/cache`; catalog reads still hit MySQL.
-5. Grow the BFF as the mobile app's needs become concrete (only `/bff/home` +
-   health exist today).
+## Product / commercialization (decided with the user)
+
+Turning this from a personal project into a **commercial product**. Decisions:
+- **Model**: freemium subscription (free tier + Pro; Pro = pack generator, full
+  season planner, garage sync, private cloud setups, unlimited goals).
+- **License**: MIT (open repo) — the value is the hosted service, not the code.
+- **iRacing**: an official partnership is NOT expected to be attainable, so we
+  **monetize WITHOUT it**. This means: never sell access to iRacing's
+  copyrighted assets/data. Sell the ORIGINAL tools (fuel calc, setup generator,
+  planner UX). `IRACING_SCRAPE` is off; the scraped artwork/descriptions must be
+  replaced with our own before those catalog features are part of a paid tier.
+- **Do not reintroduce** "learning/pet project" tells in user-facing surfaces.
+
+Productization backlog (ordered; legal/IP first was slice 1 above):
+1. Finish IP hygiene: replace scraped car/track artwork with **own track-map SVGs
+   + original descriptions**; add **Terms of Service + Privacy Policy** pages
+   (DB-served like locales/nav) linked from the footer.
+2. **Security/ops hardening**: prod-safe config defaults (CORS allowlist, Secure
+   cookies, drop host 3306/8080 port maps, `/metrics` internal-only), rate
+   limiting on `/api/auth/*` (go-chi/httprate + nginx `limit_req`), TLS + security
+   headers, error tracking (Sentry), constant-time Cockpit key compare, session
+   rotation/revocation.
+3. **Account lifecycle**: transactional email (SMTP config + mailer pkg) →
+   password reset, email verification, account deletion + data export (GDPR),
+   password-confirmed email change.
+4. **Billing**: Stripe subscriptions + Pro feature-gating + upgrade page.
+5. Edit `nav_items` from the Cockpit (menu is DB-driven; the editor UI is missing).
+6. Microfrontend split (module federation) — design first.
+7. Extend the Redis cache to catalog reads; grow the BFF as the mobile app needs.

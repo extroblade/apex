@@ -23,8 +23,8 @@ Locales are **backend-driven**: only `en` is bundled (`shared/i18n/locales/en.ts
 language (incl. `ru`) is served by the backend: the menu lists `GET /api/locales`
 (`useAvailableLocales`) and `setLanguage` fetches `GET /api/locales/{code}` on
 demand, so a new language is a DB row with no app deploy. `en.ts`+`ru.ts` remain
-the authored, type-checked source (`ru.ts` typed against `en`); `npm run
-gen:locales` (part of `npm run build`) exports them to
+the authored, type-checked source (`ru.ts` typed against `en`); `pnpm run
+gen:locales` (part of `pnpm run build`) exports them to
 `backend/internal/locales/data/*.json` for the backend to embed + seed — it does
 NOT ship `ru` in the bundle. Boot requests (`/api/auth/me`, `/api/features`,
 `/api/nav`, `/api/locales`) are prefetched in `app/index.tsx` + `<link
@@ -86,9 +86,9 @@ Each slice exposes a public API via its `index.ts`; import from the slice root
 
 ## Storybook & E2E
 
-- Stories: co-locate `*.stories.tsx` next to components. `npm run storybook`.
+- Stories: co-locate `*.stories.tsx` next to components. `pnpm run storybook`.
 - E2E (Playwright) in `e2e/*.spec.ts`, run against the live stack on :3000:
-  `npx playwright install chromium` once, then `npm run e2e`.
+  `pnpm exec playwright install chromium` once, then `pnpm run e2e`.
 
 ## a11y
 
@@ -99,11 +99,11 @@ Radix primitives for dialogs/menus (they handle focus + ARIA), and
 
 ## Checks (run before finishing)
 
-`npm run typecheck && npm run lint && npm test && npm run build`
-E2E: `npm run e2e` (stack must be up; Chromium-only — use Pixel device
+`pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build`
+E2E: `pnpm run e2e` (stack must be up; Chromium-only — use Pixel device
 profiles for mobile specs, iPhone profiles need WebKit which isn't installed).
 
 ## Adding a shadcn component
 
-`npx shadcn@latest add <name>` — `components.json` aliases resolve into
+`pnpm dlx shadcn@latest add <name>` — `components.json` aliases resolve into
 `src/shared/ui`. Keep components token-driven so they theme correctly.

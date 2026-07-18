@@ -6,3 +6,5 @@
 .zcode
 # `go build ./...` in nav/ drops the compiled binary next to the sources.
 /nav/apexnav
+# pnpm store fallout from containerized installs — never commit.
+.pnpm-store/

@@ -1,0 +1,6 @@
+# pnpm settings (pnpm 11+ reads these from here, not from package.json).
+# Dependency postinstall scripts are blocked by default; explicitly allow the
+# ones that need to run (esbuild installs its platform binary).
+allowBuilds:
+  core-js: false # postinstall only prints a funding banner
+  esbuild: true

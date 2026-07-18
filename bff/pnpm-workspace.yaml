@@ -1,0 +1,5 @@
+# pnpm settings (pnpm 11+ reads these from here, not from package.json).
+# Dependency postinstall scripts are blocked by default; @nestjs/core's only
+# prints a funding banner, so keep it blocked — this entry records the decision.
+allowBuilds:
+  '@nestjs/core': false

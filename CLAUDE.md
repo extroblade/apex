@@ -70,10 +70,10 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
 ## Run & verify (ALWAYS before calling a change done)
 
 - Backend: `cd backend && go build ./... && go vet ./... && go test ./...`
-- Frontend: `cd frontend && npm run typecheck && npm run lint && npm test && npm run build`
-- E2E (stack up; `npx playwright install chromium` once): `cd frontend && npm run e2e`
+- Frontend: `cd frontend && pnpm run typecheck && pnpm run lint && pnpm test && pnpm run build`
+- E2E (stack up; `pnpm exec playwright install chromium` once): `cd frontend && pnpm run e2e`
   — 8 specs, incl. a Pixel-7 mobile spec. Use Chromium device profiles only.
-- Storybook: `npm run storybook` / `npm run build-storybook`.
+- Storybook: `pnpm run storybook` / `pnpm run build-storybook`.
 
 ## Non-negotiable standards
 
@@ -130,8 +130,8 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
   a row in the `locales` table (migration 0023), served by `GET /api/locales`
   (list) + `GET /api/locales/{code}` (bundle JSON). A new language is a DB row —
   no frontend deploy (proven: `INSERT` a locale, it appears in the menu). `en.ts`
-  + `ru.ts` stay the authored, type-checked source; `npm run gen:locales`
-  (part of `npm run build`) exports them to `backend/internal/locales/data/*.json`
+  + `ru.ts` stay the authored, type-checked source; `pnpm run gen:locales`
+  (part of `pnpm run build`) exports them to `backend/internal/locales/data/*.json`
   for the backend to `go:embed` + seed on startup (built-ins re-seed via
   `ON DUPLICATE KEY UPDATE`; runtime-added locales are untouched). A key-parity
   test (`internal/locales`) guards the generated bundles against drift.

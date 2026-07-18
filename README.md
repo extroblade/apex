@@ -132,8 +132,8 @@ Frontend (rsbuild dev server proxies `/api` → `http://localhost:8080`):
 
 ```bash
 cd frontend
-npm install
-npm run dev                   # http://localhost:3000
+pnpm install
+pnpm run dev                  # http://localhost:3000
 ```
 
 Tip: `docker compose up db` to run just MySQL while developing the apps natively.
@@ -275,5 +275,5 @@ components with:
 
 ```bash
 cd frontend
-npx shadcn@latest add dialog
+pnpm dlx shadcn@latest add dialog
 ```

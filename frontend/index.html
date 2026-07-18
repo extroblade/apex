@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#0b0b0c" />
-    <title>Apex — race planner</title>
+    <title>Apex — iRacing fuel calculator, setups & season planner</title>
+    <meta
+      name="description"
+      content="Apex is a companion app for sim racers: fuel & stint calculator, setup generator, season planner, garage, and goal tracking."
+    />
     <!-- Preload the boot requests so first paint has data ready. -->
     <link rel="preload" href="/api/features" as="fetch" crossorigin="use-credentials" />
     <link rel="preload" href="/api/auth/me" as="fetch" crossorigin="use-credentials" />
-    <link rel="preload" href="/media/locales/index.json" as="fetch" crossorigin="anonymous" />
+    <link rel="preload" href="/api/nav" as="fetch" crossorigin="use-credentials" />
+    <link rel="preload" href="/api/locales" as="fetch" crossorigin="use-credentials" />
     <script>
       // Apply the saved theme before first paint to avoid a flash.
       (function () {

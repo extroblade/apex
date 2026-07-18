@@ -4,6 +4,15 @@
 garage, setups showroom, goal tracker, and driver stats. Go + MySQL backend,
 React + TypeScript frontend. Everything is Dockerized.
 
+> **Not affiliated with iRacing.** Apex is an independent project and is not
+> affiliated with, endorsed by, or sponsored by iRacing.com Motorsport
+> Simulations, LLC. "iRacing" is a trademark of its respective owner, used here
+> only nominatively to describe compatibility. Licensed under [MIT](LICENSE).
+> The MIT license covers the source only — it grants no rights to third-party
+> data or trademarks. Catalog scraping of iracing.com (artwork, descriptions) is
+> **off by default** (`IRACING_SCRAPE`); enable it only where you have the right
+> to use that content.
+
 - **Backend** — Go 1.25, [chi](https://github.com/go-chi/chi) router, `database/sql` + MySQL driver. HTTP API + a daily schedule-sync scheduler.
 - **Frontend** — React + TypeScript, built with [rsbuild](https://rsbuild.dev). Routing via [wouter](https://github.com/molefrog/wouter), client state via [zustand](https://zustand.docs.pmnd.rs), server state via [TanStack Query](https://tanstack.com/query), UI via [shadcn/ui](https://ui.shadcn.com) + Tailwind CSS v4. Organized with [Feature-Sliced Design](https://feature-sliced.design).
 - **Nav** — a small standalone Go service that owns the app's **menu configuration** (`nav_items`) and serves it at `/api/nav`, so navigation is data on the backend rather than hard-coded in the SPA. It needs only MySQL: it serves the menu plus each item's `requiresAuth`/`featureFlag` metadata and lets the client (which already holds the viewer and the flags) filter — navigation isn't a security boundary, since every API route enforces its own auth.

@@ -259,4 +259,9 @@ export const ru: Translation = {
     disabled: 'Отключён',
     error: 'Не удалось загрузить флаги.',
   },
+  footer: {
+    disclaimer:
+      'Apex — независимый проект, не аффилирован с iRacing.com Motorsport Simulations, LLC, не одобрен и не спонсируется ими. «iRacing» — товарный знак правообладателя, используется здесь только для описания совместимости.',
+    rights: 'Все права защищены.',
+  },
 };

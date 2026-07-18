@@ -3,6 +3,7 @@ import { AppRouter } from './providers/router';
 import { Header } from '@/widgets/header';
 import { SideNav } from '@/widgets/side-nav';
 import { BottomNav } from '@/widgets/bottom-nav';
+import { Footer } from '@/widgets/footer';
 import { Cockpit } from '@/features/cockpit';
 
 export function App() {
@@ -23,6 +24,7 @@ export function App() {
           <main id="main" className="min-w-0 flex-1 px-4 py-8 pb-24 md:pb-8">
             <div className="mx-auto max-w-6xl">
               <AppRouter />
+              <Footer />
             </div>
           </main>
         </div>

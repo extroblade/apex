@@ -18,6 +18,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 const (
@@ -56,12 +57,21 @@ func urlOr(env, fallback string) string {
 	return fallback
 }
 
-// Run refreshes the catalog from two complementary sources (deduped by content
-// hash via schedule_imports, so unchanged fetches are skipped):
-//   - the community JSON lists give the full set of ids incl. legacy content,
-//     with prices and sku groups;
-//   - the iRacing web catalog adds artwork (image_path) and the authoritative
-//     free/included flag, matched onto our rows by name.
+// scrapeEnabled reports whether the iRacing web-catalog scraping steps may run.
+// They are OFF unless IRACING_SCRAPE is explicitly "1"/"true". These steps pull
+// artwork and marketing copy straight from iracing.com, which is a copyright/ToS
+// risk for a commercial deploy — so the product does NOT do it by default. The
+// factual JSON lists (ids, prices, schedule) and the app's own seeded
+// descriptions remain the source of truth.
+func scrapeEnabled() bool {
+	v := strings.ToLower(strings.TrimSpace(os.Getenv("IRACING_SCRAPE")))
+	return v == "1" || v == "true" || v == "yes"
+}
+
+// Run refreshes the catalog. The community JSON lists (ids, prices, free flags,
+// schedule) always run — they're facts. The iRacing web-catalog steps (artwork
+// rehosting, verbatim description scraping) only run when IRACING_SCRAPE is on,
+// because they copy iRacing's copyrighted assets/text; see scrapeEnabled.
 func (s *Syncer) Run(ctx context.Context) {
 	if err := s.syncCars(ctx, urlOr("CONTENT_CARS_URL", defaultCarsURL)); err != nil {
 		log.Printf("contentsync: cars: %v", err)
@@ -72,6 +82,12 @@ func (s *Syncer) Run(ctx context.Context) {
 	// Series AFTER cars/tracks so schedule rows reference known catalog ids.
 	if err := s.syncSeries(ctx, urlOr("CONTENT_SERIES_URL", defaultSeriesURL)); err != nil {
 		log.Printf("contentsync: series: %v", err)
+	}
+
+	if !scrapeEnabled() {
+		log.Printf("contentsync: iRacing web-catalog scrape disabled (set IRACING_SCRAPE=1 to enable); " +
+			"skipping artwork rehost + description backfill")
+		return
 	}
 	if err := s.syncWebCatalog(ctx, urlOr("CONTENT_CARS_HTML_URL", defaultCarsHTMLURL), "cars", "car_name"); err != nil {
 		log.Printf("contentsync: web cars: %v", err)

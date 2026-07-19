@@ -35,7 +35,7 @@ func TestUpdateAvatarValidation(t *testing.T) {
 
 func TestChangePasswordRejectsWeak(t *testing.T) {
 	s := &Service{}
-	if err := s.ChangePassword(context.Background(), 1, "whatever", "short"); !errors.Is(err, ErrWeakPassword) {
+	if err := s.ChangePassword(context.Background(), 1, "whatever", "short", ""); !errors.Is(err, ErrWeakPassword) {
 		t.Errorf("weak new password: want ErrWeakPassword, got %v", err)
 	}
 }

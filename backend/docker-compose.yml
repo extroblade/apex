@@ -8,12 +8,15 @@ services:
     image: mysql:8.4
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-root}"
       MYSQL_DATABASE: app
       MYSQL_USER: app
-      MYSQL_PASSWORD: app
+      MYSQL_PASSWORD: "${DB_PASSWORD:-app}"
     ports:
-      - "3306:3306"
+      # Bound to loopback: reachable for local dev/tools, NOT the host's public
+      # interface. For production, drop this mapping entirely (services reach db
+      # over apex-net) and set strong passwords via .env.
+      - "127.0.0.1:3306:3306"
     volumes:
       - db_data:/var/lib/mysql
       # Schema is managed by the app's migration runner (internal/migrate),
@@ -48,9 +51,11 @@ services:
       DB_HOST: db
       DB_PORT: "3306"
       DB_USER: app
-      DB_PASSWORD: app
+      DB_PASSWORD: "${DB_PASSWORD:-app}"
       DB_NAME: app
-      CORS_ORIGIN: "*"
+      # Same-origin behind nginx needs no CORS; this allowlist only matters for
+      # direct cross-origin API calls (e.g. a separate dev frontend host).
+      CORS_ORIGIN: "${CORS_ORIGIN:-http://localhost:3000}"
       # Redis cache (fail-open). Point at the redis service; unset to disable.
       REDIS_ADDR: "redis:6379"
       # Cockpit dev-overlay key: open the app with ?dev=<key> to unlock it.
@@ -68,7 +73,9 @@ services:
       IRACING_CLIENT_SECRET: "${IRACING_CLIENT_SECRET:-}"
       IRACING_OAUTH_REDIRECT_URI: "${IRACING_OAUTH_REDIRECT_URI:-http://localhost:3000/api/iracing/callback}"
     ports:
-      - "8080:8080"
+      # Loopback only — nginx proxies /api in prod, and /metrics must not be
+      # public. Drop this mapping entirely for a production deploy.
+      - "127.0.0.1:8080:8080"
     depends_on:
       db:
         condition: service_healthy

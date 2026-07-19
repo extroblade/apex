@@ -39,13 +39,15 @@ type Config struct {
 // Load reads configuration from the environment, applying sensible defaults.
 func Load() *Config {
 	return &Config{
-		Port:                env("PORT", "8080"),
-		DBHost:              env("DB_HOST", "localhost"),
-		DBPort:              env("DB_PORT", "3306"),
-		DBUser:              env("DB_USER", "app"),
-		DBPassword:          env("DB_PASSWORD", "app"),
-		DBName:              env("DB_NAME", "app"),
-		CORSOrigin:          env("CORS_ORIGIN", "*"),
+		Port:       env("PORT", "8080"),
+		DBHost:     env("DB_HOST", "localhost"),
+		DBPort:     env("DB_PORT", "3306"),
+		DBUser:     env("DB_USER", "app"),
+		DBPassword: env("DB_PASSWORD", "app"),
+		DBName:     env("DB_NAME", "app"),
+		// Empty = deny cross-origin (the SPA is same-origin behind nginx, so it
+		// needs no CORS). Set to a comma-separated allowlist for direct API access.
+		CORSOrigin:          env("CORS_ORIGIN", ""),
 		CookieSecure:        env("COOKIE_SECURE", "false") == "true",
 		EncryptionKey:       env("APP_ENCRYPTION_KEY", ""),
 		IRacingClientID:     env("IRACING_CLIENT_ID", ""),

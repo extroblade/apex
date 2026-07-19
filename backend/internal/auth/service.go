@@ -197,8 +197,10 @@ func (s *Service) UpdateAvatar(ctx context.Context, userID int64, dataURL string
 	return s.userByID(ctx, userID)
 }
 
-// ChangePassword verifies the current password and sets a new one.
-func (s *Service) ChangePassword(ctx context.Context, userID int64, current, next string) error {
+// ChangePassword verifies the current password and sets a new one. It also
+// revokes every OTHER session for the user (keepToken, the caller's current
+// session, survives) so a leaked/old token can't outlive a password change.
+func (s *Service) ChangePassword(ctx context.Context, userID int64, current, next, keepToken string) error {
 	if len(next) < minPasswordLen {
 		return ErrWeakPassword
 	}
@@ -216,8 +218,13 @@ func (s *Service) ChangePassword(ctx context.Context, userID int64, current, nex
 	if err != nil {
 		return err
 	}
+	if _, err = s.db.ExecContext(ctx,
+		`UPDATE users SET password_hash = ? WHERE id = ?`, newHash, userID); err != nil {
+		return err
+	}
+	// Revoke all sessions except the current one.
 	_, err = s.db.ExecContext(ctx,
-		`UPDATE users SET password_hash = ? WHERE id = ?`, newHash, userID)
+		`DELETE FROM sessions WHERE user_id = ? AND token_hash <> ?`, userID, hashToken(keepToken))
 	return err
 }
 

@@ -126,7 +126,12 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, errBody("invalid JSON body"))
 		return
 	}
-	if err := h.Auth.ChangePassword(r.Context(), user.ID, req.CurrentPassword, req.NewPassword); err != nil {
+	// The current session token — kept alive while all others are revoked.
+	var keepToken string
+	if c, err := r.Cookie(middleware.SessionCookie); err == nil {
+		keepToken = c.Value
+	}
+	if err := h.Auth.ChangePassword(r.Context(), user.ID, req.CurrentPassword, req.NewPassword, keepToken); err != nil {
 		writeJSON(w, authStatus(err), errBody(err.Error()))
 		return
 	}

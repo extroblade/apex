@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -24,7 +25,8 @@ func (h *Handler) devAuth(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	c, err := r.Cookie(devCookie)
-	if err != nil || c.Value != key {
+	// Constant-time compare so the key can't be recovered by timing the response.
+	if err != nil || subtle.ConstantTimeCompare([]byte(c.Value), []byte(key)) != 1 {
 		return false
 	}
 	return true

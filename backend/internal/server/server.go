@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httprate"
 
 	"apex/internal/auth"
 	"apex/internal/cache"
@@ -78,8 +80,14 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 		r.Get("/health/cockpit", h.HealthCockpit)
 
 		r.Route("/auth", func(r chi.Router) {
-			r.Post("/register", h.Register)
-			r.Post("/login", h.Login)
+			// Throttle credential endpoints by client IP to blunt brute-force /
+			// credential-stuffing: 10 attempts/minute/IP on the unauthenticated
+			// login+register surface (nginx limit_req is the second layer in prod).
+			r.Group(func(r chi.Router) {
+				r.Use(httprate.LimitByIP(10, time.Minute))
+				r.Post("/register", h.Register)
+				r.Post("/login", h.Login)
+			})
 			r.Post("/logout", h.Logout)
 			r.Get("/me", h.Me)
 

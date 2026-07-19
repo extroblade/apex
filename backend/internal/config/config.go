@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -34,6 +35,9 @@ type Config struct {
 	// RedisAddr is the host:port of the Redis cache (e.g. "redis:6379"). Empty
 	// disables caching — the app reads straight from the DB (fail-open).
 	RedisAddr string
+	// AuthRateLimit is the max register/login attempts per IP per minute.
+	// <= 0 disables the limiter (used in tests/e2e where all traffic is one IP).
+	AuthRateLimit int
 }
 
 // Load reads configuration from the environment, applying sensible defaults.
@@ -55,7 +59,18 @@ func Load() *Config {
 		IRacingRedirectURI:  env("IRACING_OAUTH_REDIRECT_URI", ""),
 		DeveloperKey:        env("DEVELOPER_KEY", ""),
 		RedisAddr:           env("REDIS_ADDR", ""),
+		AuthRateLimit:       envInt("AUTH_RATE_LIMIT", 20),
 	}
+}
+
+// envInt reads an integer env var, falling back to def on empty/invalid input.
+func envInt(key string, def int) int {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+	}
+	return def
 }
 
 // DSN builds the MySQL data source name.

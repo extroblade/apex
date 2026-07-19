@@ -32,6 +32,10 @@ jobs:
         run: docker volume create --name apex-media-data
 
       - name: start backend (db + api)
+        # All e2e traffic comes from one IP; disable the auth rate limiter so the
+        # parallel registrations aren't throttled.
+        env:
+          AUTH_RATE_LIMIT: '0'
         run: docker compose -f backend/docker-compose.yml up -d --build db backend
 
       - name: start static (avatars)

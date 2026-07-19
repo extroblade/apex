@@ -260,6 +260,9 @@ export const en = {
     disclaimer:
       'Apex is an independent project and is not affiliated with, endorsed by, or sponsored by iRacing.com Motorsport Simulations, LLC. "iRacing" is a trademark of its respective owner, used here only to describe compatibility.',
     rights: 'All rights reserved.',
+    about: 'About',
+    terms: 'Terms',
+    privacy: 'Privacy',
   },
 };
 

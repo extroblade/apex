@@ -58,6 +58,9 @@ services:
       CORS_ORIGIN: "${CORS_ORIGIN:-http://localhost:3000}"
       # Redis cache (fail-open). Point at the redis service; unset to disable.
       REDIS_ADDR: "redis:6379"
+      # Auth attempts/min/IP (register+login). 0 disables (e2e sets it, since all
+      # test traffic comes from one IP).
+      AUTH_RATE_LIMIT: "${AUTH_RATE_LIMIT:-20}"
       # Cockpit dev-overlay key: open the app with ?dev=<key> to unlock it.
       # Defaults to "3" so the overlay works out of the box in any environment
       # this compose starts. Empty disables Cockpit entirely.

@@ -5,6 +5,7 @@ import { SideNav } from '@/widgets/side-nav';
 import { BottomNav } from '@/widgets/bottom-nav';
 import { Footer } from '@/widgets/footer';
 import { Cockpit } from '@/features/cockpit';
+import { ErrorBoundary } from '@/shared/ui/error-boundary';
 
 export function App() {
   return (
@@ -23,7 +24,9 @@ export function App() {
           <SideNav />
           <main id="main" className="min-w-0 flex-1 px-4 py-8 pb-24 md:pb-8">
             <div className="mx-auto max-w-6xl">
-              <AppRouter />
+              <ErrorBoundary>
+                <AppRouter />
+              </ErrorBoundary>
               <Footer />
             </div>
           </main>

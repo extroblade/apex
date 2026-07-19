@@ -14,6 +14,7 @@ import { DriversPage } from '@/pages/drivers';
 import { DriverProfilePage } from '@/pages/driver-profile';
 import { ProfilePage } from '@/pages/profile';
 import { AboutPage } from '@/pages/about';
+import { TermsPage, PrivacyPage } from '@/pages/legal';
 
 export function AppRouter() {
   return (
@@ -32,6 +33,8 @@ export function AppRouter() {
       <Route path="/login" component={LoginPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/about" component={AboutPage} />
+      <Route path="/terms" component={TermsPage} />
+      <Route path="/privacy" component={PrivacyPage} />
       <Route>
         <p className="text-sm text-muted-foreground">404 — Not found</p>
       </Route>

@@ -81,10 +81,12 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 
 		r.Route("/auth", func(r chi.Router) {
 			// Throttle credential endpoints by client IP to blunt brute-force /
-			// credential-stuffing: 10 attempts/minute/IP on the unauthenticated
-			// login+register surface (nginx limit_req is the second layer in prod).
+			// credential-stuffing (nginx limit_req is the second layer in prod).
+			// AuthRateLimit <= 0 disables it (tests/e2e run all traffic from one IP).
 			r.Group(func(r chi.Router) {
-				r.Use(httprate.LimitByIP(10, time.Minute))
+				if cfg.AuthRateLimit > 0 {
+					r.Use(httprate.LimitByIP(cfg.AuthRateLimit, time.Minute))
+				}
 				r.Post("/register", h.Register)
 				r.Post("/login", h.Login)
 			})

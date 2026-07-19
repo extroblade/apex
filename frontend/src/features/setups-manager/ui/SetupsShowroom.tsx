@@ -71,7 +71,11 @@ function SetupCard({ setup, onOpen }: { setup: Setup; onOpen: () => void }) {
   return (
     <li className="flex flex-col gap-2 rounded-md border p-3">
       <div className="flex items-start gap-3">
-        <CatalogThumbnail category={setup.category} className="size-10" />
+        <CatalogThumbnail
+          category={setup.category}
+          name={setup.carName}
+          className="size-10"
+        />
         <div className="min-w-0 flex-1">
           <button
             type="button"

@@ -136,19 +136,24 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
   `ON DUPLICATE KEY UPDATE`; runtime-added locales are untouched). A key-parity
   test (`internal/locales`) guards the generated bundles against drift.
   `setLanguage` fetches non-`en` bundles on demand; missing keys fall back to en.
-- **Catalog image rehosting** (`internal/contentsync/images.go`): the scheduler
-  downloads each catalog image once (per base name — configs share art) into the
-  shared **`apex-media-data`** volume and rewrites `image_path` to a relative
-  `/media/catalog/<table>/<file>`. The volume ROOT is the catalog dir:
-  `CATALOG_IMAGE_DIR=/media-data` in the scheduler; static mounts the same volume
-  at `/usr/share/nginx/html/catalog` (do NOT nest an extra `/catalog` in
-  `CATALOG_IMAGE_DIR` — it double-nests). The Dockerfile pre-creates
-  `/media-data/{cars,tracks}` owned by `nonroot` so the fresh volume is writable
-  (distroless runs as nonroot). Descriptions are backfilled from each detail page
-  (`detail_url`, migration 0020) — meta/og/first-`<p>`, capped to 1000 chars,
-  column widened to `VARCHAR(2000)` (migration 0022). Rehost + descriptions run
-  as their OWN DB-scanning steps every sync (image_path LIKE 'http%' /
-  description='' AND detail_url<>''), INDEPENDENT of the content-hash guard.
+- **Catalog art is GENERATED, never scraped** (product/IP decision): the planner
+  API serves **no image field**; `CatalogThumbnail` (frontend `shared/ui`)
+  renders deterministic identity art — category hue family + icon, with a
+  name-hashed variation (hue shift, gradient angle, two "livery" stripes) so
+  every item looks distinct. Pass `name` for per-item art. Migration 0024 purged
+  all scraped `image_path`s and scraped descriptions (rows with `detail_url`);
+  the authored seed descriptions (32 cars / 115 tracks) re-apply on startup —
+  the seed upsert only overwrites descriptions with NON-empty seed values, which
+  is why the purge migration was needed at all. Authoring more original
+  descriptions = editing `catalog_seed.json` (regen via gen-catalog-seed.py
+  keeps them — they live in the exports it merges).
+- **Legacy scrape machinery** (`internal/contentsync/images.go`, `webcatalog.go`)
+  still exists but only runs with `IRACING_SCRAPE=1` (default OFF — copyright/ToS
+  risk; never enable for the hosted product). If enabled it rehosts images into
+  the `apex-media-data` volume (`CATALOG_IMAGE_DIR=/media-data` = volume ROOT;
+  static mounts it at `/usr/share/nginx/html/catalog`; don't double-nest) and
+  backfills descriptions from `detail_url` pages. The API would still not serve
+  them — the field is gone from the DTOs.
 - **Cockpit dev overlay** (`internal/handler/cockpit.go`, `features/cockpit`):
   `?dev=KEY` sets a `developer` cookie (`?dev=off` clears it; handled in
   `app/index.tsx`). Backend `DEVELOPER_KEY` env gates it — empty = all off;
@@ -229,9 +234,11 @@ Turning this from a personal project into a **commercial product**. Decisions:
 - **Do not reintroduce** "learning/pet project" tells in user-facing surfaces.
 
 Productization backlog (ordered; slices 1 done — see "Done recently"):
-1. Finish IP hygiene: replace scraped car/track artwork with **own track-map SVGs
-   + original descriptions** (Terms/Privacy pages are DONE). Rotate the leaked AES
-   key (still in git history) before any real deploy.
+1. IP hygiene — DONE except ongoing copywriting: catalog art is now generated
+   identity art (no image field in the API; migration 0024 purged scraped
+   images/descriptions; authored seed copy restored). Remaining: author original
+   descriptions for more of the catalog (seed has 32 cars / 115 tracks), and
+   rotate the leaked AES key (still in git history) before any real deploy.
 2. Finish security/ops: **TLS termination + HSTS** (deployment), **error tracking
    SDK** (wire Sentry into the ErrorBoundary hook + backend Recoverer), full
    **session rotation** + expired-row purge, drop the loopback port maps entirely

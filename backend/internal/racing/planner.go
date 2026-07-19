@@ -4,13 +4,15 @@ import "context"
 
 // --- DTOs returned to the client (catalog items carry per-user flags) ---
 
+// Catalog items deliberately carry NO image field: catalog art is generated
+// client-side (CatalogThumbnail) from the item's identity, never third-party
+// artwork (see the IRACING_SCRAPE note in contentsync).
 type CarItem struct {
 	CarID       int    `json:"carId"`
 	CarName     string `json:"carName"`
 	Category    string `json:"category"`
 	Description string `json:"description"`
 	Free        bool   `json:"free"`
-	ImagePath   string `json:"imagePath"`
 	Owned       bool   `json:"owned"`
 }
 
@@ -21,7 +23,6 @@ type TrackItem struct {
 	Category    string `json:"category"`
 	Description string `json:"description"`
 	Free        bool   `json:"free"`
-	ImagePath   string `json:"imagePath"`
 	Owned       bool   `json:"owned"`
 }
 
@@ -31,7 +32,6 @@ type SeriesItem struct {
 	Category      string `json:"category"`
 	Description   string `json:"description"`
 	LicenseNeeded string `json:"licenseNeeded"`
-	ImagePath     string `json:"imagePath"`
 	Favorite      bool   `json:"favorite"`
 }
 
@@ -108,7 +108,7 @@ func (s *Service) SyncCatalog(ctx context.Context, userID int64) (CatalogCounts,
 
 func (s *Service) Cars(ctx context.Context, userID int64) ([]CarItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT c.car_id, c.car_name, c.category, c.description, c.is_free, c.image_path,
+		SELECT c.car_id, c.car_name, c.category, c.description, c.is_free,
 		       o.car_id IS NOT NULL AS owned
 		FROM cars c
 		LEFT JOIN owned_cars o ON o.car_id = c.car_id AND o.user_id = ?
@@ -121,7 +121,7 @@ func (s *Service) Cars(ctx context.Context, userID int64) ([]CarItem, error) {
 	items := make([]CarItem, 0)
 	for rows.Next() {
 		var it CarItem
-		if err := rows.Scan(&it.CarID, &it.CarName, &it.Category, &it.Description, &it.Free, &it.ImagePath, &it.Owned); err != nil {
+		if err := rows.Scan(&it.CarID, &it.CarName, &it.Category, &it.Description, &it.Free, &it.Owned); err != nil {
 			return nil, err
 		}
 		items = append(items, it)
@@ -132,7 +132,7 @@ func (s *Service) Cars(ctx context.Context, userID int64) ([]CarItem, error) {
 func (s *Service) Tracks(ctx context.Context, userID int64) ([]TrackItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT t.track_id, t.track_name, t.config_name, t.category, t.description, t.is_free,
-		       t.image_path, o.track_id IS NOT NULL AS owned
+		       o.track_id IS NOT NULL AS owned
 		FROM tracks t
 		LEFT JOIN owned_tracks o ON o.track_id = t.track_id AND o.user_id = ?
 		ORDER BY t.track_name, t.config_name`, userID)
@@ -144,7 +144,7 @@ func (s *Service) Tracks(ctx context.Context, userID int64) ([]TrackItem, error)
 	items := make([]TrackItem, 0)
 	for rows.Next() {
 		var it TrackItem
-		if err := rows.Scan(&it.TrackID, &it.TrackName, &it.ConfigName, &it.Category, &it.Description, &it.Free, &it.ImagePath, &it.Owned); err != nil {
+		if err := rows.Scan(&it.TrackID, &it.TrackName, &it.ConfigName, &it.Category, &it.Description, &it.Free, &it.Owned); err != nil {
 			return nil, err
 		}
 		items = append(items, it)
@@ -155,7 +155,7 @@ func (s *Service) Tracks(ctx context.Context, userID int64) ([]TrackItem, error)
 func (s *Service) SeriesList(ctx context.Context, userID int64) ([]SeriesItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT s.series_id, s.series_name, s.category, s.description, s.license_needed,
-		       s.image_path, f.series_id IS NOT NULL AS favorite
+		       f.series_id IS NOT NULL AS favorite
 		FROM series s
 		LEFT JOIN favorite_series f ON f.series_id = s.series_id AND f.user_id = ?
 		ORDER BY s.series_name`, userID)
@@ -167,7 +167,7 @@ func (s *Service) SeriesList(ctx context.Context, userID int64) ([]SeriesItem, e
 	items := make([]SeriesItem, 0)
 	for rows.Next() {
 		var it SeriesItem
-		if err := rows.Scan(&it.SeriesID, &it.SeriesName, &it.Category, &it.Description, &it.LicenseNeeded, &it.ImagePath, &it.Favorite); err != nil {
+		if err := rows.Scan(&it.SeriesID, &it.SeriesName, &it.Category, &it.Description, &it.LicenseNeeded, &it.Favorite); err != nil {
 			return nil, err
 		}
 		items = append(items, it)

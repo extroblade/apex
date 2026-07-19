@@ -188,7 +188,11 @@ function SeriesHeaderCell({ s, weeks }: { s: SeasonSeries; weeks: SeasonWeek[] }
   const ownedWeeks = weeks.filter((w) => w.trackOwned).length;
   return (
     <div className="flex items-center gap-2">
-      <CatalogThumbnail category={s.category} className="size-7 shrink-0" />
+      <CatalogThumbnail
+        category={s.category}
+        name={s.seriesName}
+        className="size-7 shrink-0"
+      />
       <div className="min-w-0">
         <div className="truncate text-sm font-medium">
           {s.favorite && (

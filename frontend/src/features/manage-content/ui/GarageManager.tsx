@@ -56,7 +56,6 @@ function CarsPanel() {
     name: c.carName,
     category: c.category,
     description: c.description,
-    imagePath: c.imagePath || undefined,
     checked: c.owned,
   }));
   return (
@@ -111,7 +110,6 @@ function TracksPanel() {
         category: g.rep.category,
         description: g.rep.description,
         layouts: g.layouts,
-        imagePath: g.rep.imagePath || undefined,
         checked: g.owned,
       });
     }
@@ -140,7 +138,6 @@ function SeriesPanel() {
     category: s.category,
     description: s.description,
     badge: s.licenseNeeded ? `Lic. ${s.licenseNeeded}` : undefined,
-    imagePath: s.imagePath || undefined,
     checked: s.favorite,
   }));
   return (

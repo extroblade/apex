@@ -24,17 +24,15 @@ export interface CatalogInfo {
   description: string;
   sub?: string; // track config / "layout"
   layouts?: TrackLayout[]; // all configs of a track, shown grouped in the dialog
-  imagePath?: string; // real artwork from the iRacing catalog, if synced
 }
 
-/** An info button that opens a dialog with the item's image, category, details. */
+/** An info button that opens a dialog with the item's generated art + details. */
 export function CatalogInfoButton({
   name,
   category,
   description,
   sub,
   layouts,
-  imagePath,
 }: CatalogInfo) {
   const { label, Icon } = categoryMeta(category);
   return (
@@ -46,16 +44,8 @@ export function CatalogInfoButton({
         <Info className="size-4" />
       </DialogTrigger>
       <DialogContent>
-        {imagePath && (
-          <img
-            src={imagePath}
-            alt=""
-            loading="lazy"
-            className="mb-1 h-40 w-full rounded-md object-cover"
-          />
-        )}
         <div className="flex items-start gap-4">
-          {!imagePath && <CatalogThumbnail category={category} className="size-16" />}
+          <CatalogThumbnail category={category} name={name} className="size-16" />
           <DialogHeader>
             <DialogTitle>{name}</DialogTitle>
             <div className="flex flex-wrap items-center gap-2 pt-1">

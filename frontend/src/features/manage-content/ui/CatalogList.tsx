@@ -19,7 +19,6 @@ export interface CatalogRow {
   sub?: string;
   badge?: string; // e.g. required license class for a series
   layouts?: TrackLayout[]; // for tracks: the configs grouped under this row
-  imagePath?: string; // real artwork from the iRacing catalog, if synced
   checked: boolean;
 }
 
@@ -163,16 +162,7 @@ function Row({
 }) {
   return (
     <div className="flex items-center gap-3 border-b py-2 last:border-0">
-      {row.imagePath ? (
-        <img
-          src={row.imagePath}
-          alt=""
-          loading="lazy"
-          className="size-9 shrink-0 rounded-md object-cover"
-        />
-      ) : (
-        <CatalogThumbnail category={row.category} className="size-9" />
-      )}
+      <CatalogThumbnail category={row.category} name={row.name} className="size-9" />
       <label className="flex flex-1 cursor-pointer items-center gap-3">
         <input
           type="checkbox"
@@ -197,7 +187,6 @@ function Row({
         description={row.description}
         sub={row.badge ? [row.sub, row.badge].filter(Boolean).join(' · ') : row.sub}
         layouts={row.layouts}
-        imagePath={row.imagePath}
       />
     </div>
   );

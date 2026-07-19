@@ -5,7 +5,6 @@ export interface CarItem {
   description: string;
   owned: boolean;
   free: boolean;
-  imagePath: string;
 }
 
 export interface TrackItem {
@@ -16,7 +15,6 @@ export interface TrackItem {
   description: string;
   owned: boolean;
   free: boolean;
-  imagePath: string;
 }
 
 /**
@@ -34,7 +32,6 @@ export interface SeriesItem {
   description: string;
   licenseNeeded: string;
   favorite: boolean;
-  imagePath: string;
 }
 
 export interface SeasonWeek {

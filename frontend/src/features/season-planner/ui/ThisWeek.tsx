@@ -69,7 +69,11 @@ export function ThisWeek() {
                 : 'hover:bg-muted/50',
             )}
           >
-            <CatalogThumbnail category={series.category} className="size-10" />
+            <CatalogThumbnail
+              category={series.category}
+              name={series.seriesName}
+              className="size-10"
+            />
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-medium">{series.seriesName}</div>
               <div className={cn('truncate text-xs', accessTextClass(week.trackAccess))}>

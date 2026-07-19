@@ -208,8 +208,12 @@ description backfill**, **Cockpit dev overlay**, **Redis cache (fail-open)**,
 **setup pack generator** (2×4 skill×session), **backend-driven i18n** (locales
 service + DB-served bundles), **metrics** (frontend counterHelper + Prometheus on
 backend & BFF), **BFF** (NestJS mobile Backend-for-Frontend), **legal/IP hygiene
-slice 1** (MIT LICENSE, iRacing non-affiliation disclaimer, `IRACING_SCRAPE` gate
-default-OFF, committed AES key removed).
+slice 1** (MIT LICENSE, iRacing non-affiliation disclaimer + footer, `IRACING_SCRAPE`
+gate default-OFF, committed AES key removed, Terms/Privacy pages, product-ized
+About page), **security hardening slice 1** (auth rate limiting `AUTH_RATE_LIMIT`
++ nginx `limit_req`, allowlist CORS, nginx security headers, loopback-only host
+ports, constant-time Cockpit compare, session revocation on password change,
+React ErrorBoundary).
 
 ## Product / commercialization (decided with the user)
 
@@ -224,15 +228,15 @@ Turning this from a personal project into a **commercial product**. Decisions:
   replaced with our own before those catalog features are part of a paid tier.
 - **Do not reintroduce** "learning/pet project" tells in user-facing surfaces.
 
-Productization backlog (ordered; legal/IP first was slice 1 above):
+Productization backlog (ordered; slices 1 done — see "Done recently"):
 1. Finish IP hygiene: replace scraped car/track artwork with **own track-map SVGs
-   + original descriptions**; add **Terms of Service + Privacy Policy** pages
-   (DB-served like locales/nav) linked from the footer.
-2. **Security/ops hardening**: prod-safe config defaults (CORS allowlist, Secure
-   cookies, drop host 3306/8080 port maps, `/metrics` internal-only), rate
-   limiting on `/api/auth/*` (go-chi/httprate + nginx `limit_req`), TLS + security
-   headers, error tracking (Sentry), constant-time Cockpit key compare, session
-   rotation/revocation.
+   + original descriptions** (Terms/Privacy pages are DONE). Rotate the leaked AES
+   key (still in git history) before any real deploy.
+2. Finish security/ops: **TLS termination + HSTS** (deployment), **error tracking
+   SDK** (wire Sentry into the ErrorBoundary hook + backend Recoverer), full
+   **session rotation** + expired-row purge, drop the loopback port maps entirely
+   in a prod compose override. (Rate limiting, CORS allowlist, security headers,
+   constant-time compare, session revocation-on-password-change — DONE.)
 3. **Account lifecycle**: transactional email (SMTP config + mailer pkg) →
    password reset, email verification, account deletion + data export (GDPR),
    password-confirmed email change.

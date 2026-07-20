@@ -32,7 +32,7 @@ export function UpgradePage() {
             <CardDescription>{t('billing.currentPlanHint')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Badge variant={subscription.data?.pro ? 'default' : 'secondary'}>
+            <Badge className={subscription.data?.pro ? 'border-primary/40 text-primary' : ''}>
               {subscription.data?.pro ? t('billing.proName') : t('billing.freeName')}
             </Badge>
           </CardContent>

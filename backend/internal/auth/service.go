@@ -24,6 +24,8 @@ func randomDefaultAvatar() string {
 
 // Register creates a new account. It validates input, hashes the password, and
 // inserts the row — translating MySQL's duplicate-key error into ErrEmailTaken.
+// It also kicks off the welcome/verification email (best-effort, never fails
+// the registration).
 func (s *Service) Register(ctx context.Context, email, password string) (User, error) {
 	email = normalizeEmail(email)
 	if !validEmail(email) {
@@ -55,6 +57,10 @@ func (s *Service) Register(ctx context.Context, email, password string) (User, e
 	if err != nil {
 		return User{}, err
 	}
+	// Best-effort: send the verification email. A failure here (no SMTP
+	// configured, send error) must NOT fail the registration — the user can
+	// resend from the profile page.
+	s.SendWelcomeVerification(ctx, id, email)
 	return s.userByID(ctx, id)
 }
 
@@ -64,16 +70,18 @@ func (s *Service) Login(ctx context.Context, email, password string) (token stri
 	email = normalizeEmail(email)
 
 	var (
-		hash   string
-		avatar sql.NullString
+		hash     string
+		avatar   sql.NullString
+		verified bool
 	)
 	err = s.db.QueryRowContext(ctx,
-		`SELECT id, email, nickname, avatar_data_url, password_hash, created_at FROM users WHERE email = ?`, email).
-		Scan(&user.ID, &user.Email, &user.Nickname, &avatar, &hash, &user.CreatedAt)
+		`SELECT id, email, nickname, avatar_data_url, password_hash, email_verified, created_at FROM users WHERE email = ?`, email).
+		Scan(&user.ID, &user.Email, &user.Nickname, &avatar, &hash, &verified, &user.CreatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", User{}, ErrInvalidCredentials
 	}
 	user.AvatarURL = avatar.String
+	user.EmailVerified = verified
 	if err != nil {
 		return "", User{}, err
 	}
@@ -97,7 +105,7 @@ func (s *Service) Authenticate(ctx context.Context, token string) (User, error) 
 	}
 
 	row := s.db.QueryRowContext(ctx, `
-		SELECT u.id, u.email, u.nickname, u.avatar_data_url, u.created_at
+		SELECT u.id, u.email, u.nickname, u.avatar_data_url, u.email_verified, u.created_at
 		FROM sessions s
 		JOIN users u ON u.id = s.user_id
 		WHERE s.token_hash = ? AND s.expires_at > NOW()`,
@@ -138,7 +146,7 @@ func (s *Service) createSession(ctx context.Context, userID int64) (string, erro
 
 func (s *Service) userByID(ctx context.Context, id int64) (User, error) {
 	return scanUser(s.db.QueryRowContext(ctx,
-		`SELECT id, email, nickname, avatar_data_url, created_at FROM users WHERE id = ?`, id))
+		`SELECT id, email, nickname, avatar_data_url, email_verified, created_at FROM users WHERE id = ?`, id))
 }
 
 // scanUser reads the standard user column order, handling the nullable avatar.
@@ -147,7 +155,7 @@ func scanUser(row interface{ Scan(dest ...any) error }) (User, error) {
 		u      User
 		avatar sql.NullString
 	)
-	err := row.Scan(&u.ID, &u.Email, &u.Nickname, &avatar, &u.CreatedAt)
+	err := row.Scan(&u.ID, &u.Email, &u.Nickname, &avatar, &u.EmailVerified, &u.CreatedAt)
 	u.AvatarURL = avatar.String
 	return u, err
 }

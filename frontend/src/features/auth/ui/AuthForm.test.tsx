@@ -13,7 +13,12 @@ vi.mock('../api/use-auth', () => ({
   useRegister: () => ({ mutate: register, isPending: false, error: null }),
 }));
 
-vi.mock('wouter', () => ({ useLocation: () => ['/', vi.fn()] }));
+vi.mock('wouter', () => ({
+  useLocation: () => ['/', vi.fn()],
+  Link: ({ children, href }: { children: React.ReactNode; href: string }) => (
+    <a href={href}>{children}</a>
+  ),
+}));
 
 describe('AuthForm', () => {
   beforeEach(() => {

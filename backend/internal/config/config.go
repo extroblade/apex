@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -42,7 +43,7 @@ type Config struct {
 
 // Load reads configuration from the environment, applying sensible defaults.
 func Load() *Config {
-	return &Config{
+	cfg := &Config{
 		Port:       env("PORT", "8080"),
 		DBHost:     env("DB_HOST", "localhost"),
 		DBPort:     env("DB_PORT", "3306"),
@@ -61,6 +62,14 @@ func Load() *Config {
 		RedisAddr:           env("REDIS_ADDR", ""),
 		AuthRateLimit:       envInt("AUTH_RATE_LIMIT", 20),
 	}
+	if cfg.DeveloperKey == "3" {
+		// The compose default is a convenience for local dev, but it's a known
+		// value — anyone who opens the app with ?dev=3 can toggle feature flags.
+		// Warn loudly so a public deploy overrides DEVELOPER_KEY (or sets it
+		// empty to disable the Cockpit entirely).
+		log.Printf("config: DEVELOPER_KEY is the default \"3\" — override it for any non-local deploy (or set it empty to disable the Cockpit)")
+	}
+	return cfg
 }
 
 // envInt reads an integer env var, falling back to def on empty/invalid input.

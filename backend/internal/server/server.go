@@ -62,6 +62,12 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 	// frontend nginx, so it's only reachable inside apex-net for scraping.
 	r.Handle("/metrics", metrics.Handler())
 
+	// Cap request bodies so a single request can't stream an unbounded amount
+	// of data into json.Decode (DoS). 1 MiB comfortably covers the largest
+	// legitimate payload — the avatar data URL (~900 KiB cap) plus JSON
+	// overhead — while still rejecting anything bigger.
+	r.Use(middleware.MaxBody(1 << 20)) // 1 MiB
+
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/health", h.Health)
 		r.Get("/features", h.ListFeatures)

@@ -6,7 +6,7 @@
   "packageManager": "pnpm@11.14.0",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "node scripts/gen-locales.mjs && rsbuild build",
+    "build": "node --experimental-strip-types scripts/gen-locales.mjs && rsbuild build",
     "preview": "rsbuild preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -18,7 +18,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "e2e": "playwright test",
-    "gen:locales": "node scripts/gen-locales.mjs"
+    "gen:locales": "node --experimental-strip-types scripts/gen-locales.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

@@ -10,7 +10,9 @@ import { ErrorBoundary } from '@/shared/ui/error-boundary';
 export function App() {
   return (
     <AppProviders>
-      <div className="min-h-screen bg-background">
+      {/* min-h-screen + flex-col so the footer sits at the bottom of the
+          viewport on short pages instead of floating up under the content. */}
+      <div className="flex min-h-screen flex-col bg-background">
         {/* a11y: lets keyboard users jump straight past the navigation. */}
         <a
           href="#main"
@@ -19,14 +21,19 @@ export function App() {
           Skip to content
         </a>
         <Header />
-        <div className="flex">
+        {/* flex-1 so this row stretches to fill the viewport height; the
+            sidebar and main both stretch with it. */}
+        <div className="flex flex-1">
           {/* Desktop navigation; the bottom bar takes over below md. */}
           <SideNav />
-          <main id="main" className="min-w-0 flex-1 px-4 py-8 pb-24 md:pb-8">
-            <div className="mx-auto max-w-6xl">
-              <ErrorBoundary>
-                <AppRouter />
-              </ErrorBoundary>
+          <main id="main" className="flex min-w-0 flex-1 flex-col px-4 py-8 pb-24 md:pb-8">
+            {/* flex-1 here grows to fill, pushing the footer down to the bottom. */}
+            <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col">
+              <div className="flex-1">
+                <ErrorBoundary>
+                  <AppRouter />
+                </ErrorBoundary>
+              </div>
               <Footer />
             </div>
           </main>

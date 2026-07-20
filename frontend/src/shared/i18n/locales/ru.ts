@@ -95,7 +95,8 @@ export const ru: Translation = {
     signInRequired: 'Требуется вход',
     signInToManage: 'Войдите, чтобы управлять профилем.',
     changeEmail: 'Сменить email',
-    changeEmailHint: 'Мы отправим ссылку подтверждения на новый адрес. Текущий email действует, пока вы не подтвердите новый.',
+    changeEmailHint:
+      'Мы отправим ссылку подтверждения на новый адрес. Текущий email действует, пока вы не подтвердите новый.',
     newEmail: 'Новый email',
     requestEmailChange: 'Отправить ссылку подтверждения',
     emailChangeRequested: 'Ссылка отправлена. Проверьте новый ящик.',
@@ -103,14 +104,16 @@ export const ru: Translation = {
     cancelEmailChange: 'Отменить смену email',
     emailChangeCanceled: 'Смена email отменена.',
     dataExport: 'Ваши данные',
-    dataExportHint: 'Скачать JSON-файл со всеми данными, которые мы храним о вашем аккаунте (профиль, гараж, планы, сеты, цели).',
+    dataExportHint:
+      'Скачать JSON-файл со всеми данными, которые мы храним о вашем аккаунте (профиль, гараж, планы, сеты, цели).',
     exportData: 'Скачать мои данные',
     exportFailed: 'Не удалось выгрузить данные. Попробуйте ещё раз.',
     dangerZone: 'Опасная зона',
     dangerZoneHint: 'Удаление аккаунта необратимо. Все ваши данные будут стёрты.',
     deleteAccount: 'Удалить аккаунт',
     deleteAccountConfirmTitle: 'Удалить аккаунт?',
-    deleteAccountConfirmBody: 'Это навсегда удалит ваш аккаунт и все данные — гараж, планы, сеты, цели. Отменить нельзя. Введите пароль для подтверждения.',
+    deleteAccountConfirmBody:
+      'Это навсегда удалит ваш аккаунт и все данные — гараж, планы, сеты, цели. Отменить нельзя. Введите пароль для подтверждения.',
     deleteAccountConfirm: 'Удалить навсегда',
     deleteAccountPasswordLabel: 'Ваш пароль',
     deleteAccountSuccess: 'Аккаунт удалён. Жаль прощаться.',

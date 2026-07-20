@@ -130,12 +130,12 @@ func (s *Service) PendingEmail(ctx context.Context, userID int64) (string, error
 // user-owned rows only; nothing from other users is included. The struct is
 // JSON-marshaled as the export response body.
 type AccountData struct {
-	ExportedAt   time.Time     `json:"exportedAt"`
-	Profile      ProfileExport `json:"profile"`
-	Garage       GarageExport  `json:"garage"`
-	PlannedRaces []PlannedRace `json:"plannedRaces"`
-	Setups       []SetupExport `json:"setups"`
-	Goals        []GoalExport  `json:"goals"`
+	ExportedAt   time.Time      `json:"exportedAt"`
+	Profile      ProfileExport  `json:"profile"`
+	Garage       GarageExport   `json:"garage"`
+	PlannedRaces []PlannedRace  `json:"plannedRaces"`
+	Setups       []SetupExport  `json:"setups"`
+	Goals        []GoalExport   `json:"goals"`
 	IRacing      *IRacingExport `json:"iracing,omitempty"`
 }
 
@@ -149,9 +149,9 @@ type ProfileExport struct {
 }
 
 type GarageExport struct {
-	Cars           []OwnedCar        `json:"cars"`
-	Tracks         []OwnedTrack      `json:"tracks"`
-	FavoriteSeries []FavoriteSeries  `json:"favoriteSeries"`
+	Cars           []OwnedCar       `json:"cars"`
+	Tracks         []OwnedTrack     `json:"tracks"`
+	FavoriteSeries []FavoriteSeries `json:"favoriteSeries"`
 }
 
 type OwnedCar struct {
@@ -170,11 +170,11 @@ type FavoriteSeries struct {
 }
 
 type PlannedRace struct {
-	SeriesID   int64     `json:"seriesId"`
-	SeriesName string    `json:"seriesName"`
-	Week       int       `json:"week"`
-	RaceDate   string    `json:"raceDate"`
-	TrackName  string    `json:"trackName"`
+	SeriesID   int64  `json:"seriesId"`
+	SeriesName string `json:"seriesName"`
+	Week       int    `json:"week"`
+	RaceDate   string `json:"raceDate"`
+	TrackName  string `json:"trackName"`
 }
 
 type SetupExport struct {
@@ -207,7 +207,7 @@ type IRacingExport struct {
 	CustID      int64     `json:"custId"`
 	DisplayName string    `json:"displayName"`
 	LinkedAt    time.Time `json:"linkedAt"`
-	UpdatedAt  time.Time `json:"updatedAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
 // ExportData assembles the user's full data export. It's read-only and never

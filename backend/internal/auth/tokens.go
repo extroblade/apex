@@ -21,7 +21,7 @@ const (
 const tokenTTL = 24 * time.Hour
 
 var (
-	ErrTokenInvalid = errors.New("invalid or expired token")
+	ErrTokenInvalid    = errors.New("invalid or expired token")
 	ErrAlreadyVerified = errors.New("email already verified")
 )
 
@@ -82,7 +82,7 @@ func (s *Service) consumeToken(ctx context.Context, rawToken, kind string) (user
 	hash := hashToken(rawToken)
 	var (
 		expiresAt time.Time
-		target   sql.NullString
+		target    sql.NullString
 	)
 	err = s.db.QueryRowContext(ctx,
 		`SELECT user_id, expires_at, target_email FROM email_tokens WHERE token_hash = ? AND kind = ?`,

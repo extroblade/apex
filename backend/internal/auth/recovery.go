@@ -76,8 +76,8 @@ func (s *Service) ConfirmPasswordReset(ctx context.Context, rawToken, newPasswor
 func (s *Service) RequestEmailVerification(ctx context.Context, email string) error {
 	email = normalizeEmail(email)
 	var (
-		userID    int64
-		verified  bool
+		userID   int64
+		verified bool
 	)
 	err := s.db.QueryRowContext(ctx,
 		`SELECT id, email_verified FROM users WHERE email = ?`, email).Scan(&userID, &verified)

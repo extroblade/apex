@@ -67,15 +67,16 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 	r.Use(middleware.CORS(cfg.CORSOrigin))
 	r.Use(middleware.Auth(authSvc))
 
-	// Prometheus exposition. At the root (not under /api) and not proxied by the
-	// frontend nginx, so it's only reachable inside apex-net for scraping.
-	r.Handle("/metrics", metrics.Handler())
-
 	// Cap request bodies so a single request can't stream an unbounded amount
 	// of data into json.Decode (DoS). 1 MiB comfortably covers the largest
 	// legitimate payload — the avatar data URL (~900 KiB cap) plus JSON
-	// overhead — while still rejecting anything bigger.
+	// overhead — while still rejecting anything bigger. Must be registered
+	// before any r.Handle/r.Route call — chi panics if Use follows a route.
 	r.Use(middleware.MaxBody(1 << 20)) // 1 MiB
+
+	// Prometheus exposition. At the root (not under /api) and not proxied by the
+	// frontend nginx, so it's only reachable inside apex-net for scraping.
+	r.Handle("/metrics", metrics.Handler())
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/health", h.Health)

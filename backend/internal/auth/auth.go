@@ -50,8 +50,8 @@ var (
 // Service groups the auth operations. It holds the DB handle its methods need —
 // a common Go pattern (dependencies as struct fields, behavior as methods).
 type Service struct {
-	db     *sql.DB
-	mailer Mailer
+	db      *sql.DB
+	mailer  Mailer
 	baseURL string
 }
 

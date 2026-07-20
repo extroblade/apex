@@ -26,7 +26,10 @@ export function App() {
         <div className="flex flex-1">
           {/* Desktop navigation; the bottom bar takes over below md. */}
           <SideNav />
-          <main id="main" className="flex min-w-0 flex-1 flex-col px-4 py-8 pb-24 md:pb-8">
+          <main
+            id="main"
+            className="flex min-w-0 flex-1 flex-col px-4 py-8 pb-24 md:pb-8"
+          >
             {/* flex-1 here grows to fill, pushing the footer down to the bottom. */}
             <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col">
               <div className="flex-1">

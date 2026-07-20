@@ -83,8 +83,7 @@ export function useConfirmEmailVerification() {
 /** Resend the verification email for the logged-in user (profile banner). */
 export function useResendEmailVerification() {
   return useMutation({
-    mutationFn: () =>
-      apiFetch<void>('/api/auth/verify-email/resend', { method: 'POST' }),
+    mutationFn: () => apiFetch<void>('/api/auth/verify-email/resend', { method: 'POST' }),
   });
 }
 
@@ -120,8 +119,7 @@ export function useRequestEmailChange() {
 export function useCancelEmailChange() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () =>
-      apiFetch<void>('/api/auth/account/email', { method: 'DELETE' }),
+    mutationFn: () => apiFetch<void>('/api/auth/account/email', { method: 'DELETE' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: viewerKeys.me }),
   });
 }
@@ -147,7 +145,8 @@ export async function downloadAccountExport(): Promise<void> {
   // filename from it (or fall back to a dated default) and trigger a download.
   const disposition = res.headers.get('Content-Disposition') ?? '';
   const match = /filename="([^"]+)"/.exec(disposition);
-  const filename = match?.[1] ?? `apex-account-export-${new Date().toISOString().slice(0, 10)}.json`;
+  const filename =
+    match?.[1] ?? `apex-account-export-${new Date().toISOString().slice(0, 10)}.json`;
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

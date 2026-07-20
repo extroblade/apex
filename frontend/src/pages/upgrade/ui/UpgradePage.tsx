@@ -11,8 +11,21 @@ import {
 import { isDev } from '@/shared/lib/dev';
 import { useTranslation } from '@/shared/i18n';
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
+
+function formatSubscriptionDate(iso?: string): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString();
+}
 
 export function UpgradePage() {
   const { t } = useTranslation();
@@ -39,10 +52,32 @@ export function UpgradePage() {
             <CardTitle>{t('billing.currentPlan')}</CardTitle>
             <CardDescription>{t('billing.currentPlanHint')}</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Badge className={subscription.data?.pro ? 'border-primary/40 text-primary' : ''}>
+          <CardContent className="space-y-2">
+            <Badge
+              className={subscription.data?.pro ? 'border-primary/40 text-primary' : ''}
+            >
               {subscription.data?.pro ? t('billing.proName') : t('billing.freeName')}
             </Badge>
+            {subscription.data?.status && (
+              <p className="text-sm text-muted-foreground">
+                {t('billing.status')}:{' '}
+                <span className="font-mono">{subscription.data.status}</span>
+              </p>
+            )}
+            {subscription.data?.currentPeriodEnd && (
+              <p className="text-sm text-muted-foreground">
+                {subscription.data.cancelAtPeriodEnd
+                  ? t('billing.accessUntil', {
+                      date: formatSubscriptionDate(subscription.data.currentPeriodEnd),
+                    })
+                  : t('billing.renewsOn', {
+                      date: formatSubscriptionDate(subscription.data.currentPeriodEnd),
+                    })}
+              </p>
+            )}
+            {subscription.data?.cancelAtPeriodEnd && (
+              <p className="text-sm text-amber-600">{t('billing.cancelAtPeriodEnd')}</p>
+            )}
           </CardContent>
         </Card>
       )}
@@ -50,11 +85,15 @@ export function UpgradePage() {
       <div className="grid gap-4 md:grid-cols-2">
         {(plans.data ?? []).map((plan) => {
           const isPro = plan.key === 'pro';
-          const isCurrent = isPro ? Boolean(subscription.data?.pro) : !subscription.data?.pro;
+          const isCurrent = isPro
+            ? Boolean(subscription.data?.pro)
+            : !subscription.data?.pro;
           return (
             <Card key={plan.key}>
               <CardHeader>
-                <CardTitle>{isPro ? t('billing.proName') : t('billing.freeName')}</CardTitle>
+                <CardTitle>
+                  {isPro ? t('billing.proName') : t('billing.freeName')}
+                </CardTitle>
                 <CardDescription>
                   {plan.price} / {plan.interval}
                 </CardDescription>
@@ -81,7 +120,9 @@ export function UpgradePage() {
                         })
                       }
                     >
-                      {portal.isPending ? t('common.loading') : t('billing.manageBilling')}
+                      {portal.isPending
+                        ? t('common.loading')
+                        : t('billing.manageBilling')}
                     </Button>
                   ) : (
                     <Button disabled>{t('billing.currentPlanButton')}</Button>
@@ -97,7 +138,9 @@ export function UpgradePage() {
                         })
                       }
                     >
-                      {checkout.isPending ? t('common.loading') : t('billing.startCheckout')}
+                      {checkout.isPending
+                        ? t('common.loading')
+                        : t('billing.startCheckout')}
                     </Button>
                     {dev && (
                       <Button
@@ -106,7 +149,9 @@ export function UpgradePage() {
                         disabled={setTier.isPending}
                         onClick={() => setTier.mutate('pro')}
                       >
-                        {setTier.isPending ? t('common.loading') : t('billing.devActivatePro')}
+                        {setTier.isPending
+                          ? t('common.loading')
+                          : t('billing.devActivatePro')}
                       </Button>
                     )}
                   </div>
@@ -118,7 +163,9 @@ export function UpgradePage() {
                       disabled={setTier.isPending}
                       onClick={() => setTier.mutate('free')}
                     >
-                      {setTier.isPending ? t('common.loading') : t('billing.devSwitchFree')}
+                      {setTier.isPending
+                        ? t('common.loading')
+                        : t('billing.devSwitchFree')}
                     </Button>
                   )
                 )}
@@ -128,14 +175,20 @@ export function UpgradePage() {
         })}
       </div>
 
-      {plans.error && <p className="text-sm text-destructive">{(plans.error as Error).message}</p>}
+      {plans.error && (
+        <p className="text-sm text-destructive">{(plans.error as Error).message}</p>
+      )}
       {subscription.error && (
-        <p className="text-sm text-destructive">{(subscription.error as Error).message}</p>
+        <p className="text-sm text-destructive">
+          {(subscription.error as Error).message}
+        </p>
       )}
       {checkout.error && (
         <p className="text-sm text-destructive">{(checkout.error as Error).message}</p>
       )}
-      {portal.error && <p className="text-sm text-destructive">{(portal.error as Error).message}</p>}
+      {portal.error && (
+        <p className="text-sm text-destructive">{(portal.error as Error).message}</p>
+      )}
     </div>
   );
 }

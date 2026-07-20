@@ -18,6 +18,7 @@ import (
 )
 
 const stripeProvider = "stripe"
+const pastDueGracePeriod = 72 * time.Hour
 
 var (
 	ErrStripeNotConfigured        = errors.New("stripe is not configured")
@@ -222,19 +223,40 @@ func (s *Service) applyStripeSubscription(ctx context.Context, sub stripeSubscri
 }
 
 func (s *Service) syncTierFromSubscriptions(ctx context.Context, userID int64) error {
-	var activePro int
-	if err := s.db.QueryRowContext(ctx, `
-		SELECT COUNT(1) FROM billing_subscriptions
-		WHERE user_id = ? AND provider = ? AND plan_tier = ? AND ended_at IS NULL
-		  AND status IN ('active', 'trialing', 'past_due')`,
-		userID, stripeProvider, PlanPro).Scan(&activePro); err != nil {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT status, current_period_end
+		FROM billing_subscriptions
+		WHERE user_id = ? AND provider = ? AND plan_tier = ? AND ended_at IS NULL`,
+		userID, stripeProvider, PlanPro)
+	if err != nil {
 		return err
 	}
+	defer rows.Close()
+
+	now := time.Now().UTC()
+	activePro := false
+	for rows.Next() {
+		var (
+			status    string
+			periodEnd sql.NullTime
+		)
+		if err := rows.Scan(&status, &periodEnd); err != nil {
+			return err
+		}
+		if isEntitledStripeStatus(status, periodEnd, now) {
+			activePro = true
+			break
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	next := PlanFree
-	if activePro > 0 {
+	if activePro {
 		next = PlanPro
 	}
-	_, err := s.db.ExecContext(ctx, `UPDATE users SET plan_tier = ? WHERE id = ?`, next, userID)
+	_, err = s.db.ExecContext(ctx, `UPDATE users SET plan_tier = ? WHERE id = ?`, next, userID)
 	return err
 }
 
@@ -339,6 +361,23 @@ func isTerminalSubscriptionStatus(status string) bool {
 	switch status {
 	case "canceled", "unpaid", "incomplete_expired":
 		return true
+	default:
+		return false
+	}
+}
+
+// isEntitledStripeStatus maps raw Stripe subscription status to "Pro access on/off".
+// active/trialing are always entitled; past_due gets a short grace period after
+// current_period_end to absorb transient payment retries.
+func isEntitledStripeStatus(status string, periodEnd sql.NullTime, now time.Time) bool {
+	switch strings.ToLower(strings.TrimSpace(status)) {
+	case "active", "trialing":
+		return true
+	case "past_due":
+		if !periodEnd.Valid {
+			return false
+		}
+		return !now.After(periodEnd.Time.UTC().Add(pastDueGracePeriod))
 	default:
 		return false
 	}

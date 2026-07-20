@@ -28,7 +28,8 @@ export const subscriptionKeys = {
 export function useBillingPlans() {
   return useQuery({
     queryKey: subscriptionKeys.plans,
-    queryFn: () => apiFetch<{ plans: BillingPlan[] }>('/api/billing/plans').then((r) => r.plans),
+    queryFn: () =>
+      apiFetch<{ plans: BillingPlan[] }>('/api/billing/plans').then((r) => r.plans),
     staleTime: 5 * 60_000,
   });
 }

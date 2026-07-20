@@ -22,7 +22,7 @@ func (s *Service) RequestPasswordReset(ctx context.Context, email string) error 
 	if err != nil {
 		return err
 	}
-	token, err := s.issueToken(ctx, userID, tokenReset)
+	token, err := s.issueToken(ctx, userID, tokenReset, "")
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (s *Service) ConfirmPasswordReset(ctx context.Context, rawToken, newPasswor
 	if len(newPassword) < minPasswordLen {
 		return ErrWeakPassword
 	}
-	userID, err := s.consumeToken(ctx, rawToken, tokenReset)
+	userID, _, err := s.consumeToken(ctx, rawToken, tokenReset)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func (s *Service) RequestEmailVerification(ctx context.Context, email string) er
 	if verified {
 		return nil // already verified — no need to send
 	}
-	token, err := s.issueToken(ctx, userID, tokenVerify)
+	token, err := s.issueToken(ctx, userID, tokenVerify, "")
 	if err != nil {
 		return err
 	}
@@ -106,17 +106,35 @@ func (s *Service) RequestEmailVerification(ctx context.Context, email string) er
 }
 
 // ConfirmEmailVerification validates the token and marks the user's email
-// verified.
+// verified. If the token was issued for an email change (target_email set),
+// the pending email is promoted to the user's email and pending_email is
+// cleared — so the new address becomes the login address, marked verified.
 func (s *Service) ConfirmEmailVerification(ctx context.Context, rawToken string) error {
-	userID, err := s.consumeToken(ctx, rawToken, tokenVerify)
+	userID, target, err := s.consumeToken(ctx, rawToken, tokenVerify)
 	if err != nil {
 		return err
 	}
-	if _, err := s.db.ExecContext(ctx,
-		`UPDATE users SET email_verified = 1 WHERE id = ?`, userID); err != nil {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
 		return err
 	}
-	return nil
+	defer tx.Rollback() //nolint:errcheck
+	if target != "" {
+		// Email-change confirmation: promote the pending address. We also
+		// verify it in the same UPDATE so the user doesn't have to verify
+		// twice. pending_email is cleared.
+		if _, err := tx.ExecContext(ctx,
+			`UPDATE users SET email = ?, email_verified = 1, pending_email = NULL WHERE id = ?`,
+			target, userID); err != nil {
+			return err
+		}
+	} else {
+		if _, err := tx.ExecContext(ctx,
+			`UPDATE users SET email_verified = 1 WHERE id = ?`, userID); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }
 
 // IsEmailVerified reports whether the user has confirmed their email. Returns
@@ -139,7 +157,7 @@ func (s *Service) SendWelcomeVerification(ctx context.Context, userID int64, ema
 	if s.mailer == nil || !s.mailer.Enabled() {
 		return
 	}
-	token, err := s.issueToken(ctx, userID, tokenVerify)
+	token, err := s.issueToken(ctx, userID, tokenVerify, "")
 	if err != nil {
 		return
 	}

@@ -39,7 +39,10 @@ func newToken() (token, hash string, err error) {
 // issueToken writes a fresh (token_hash, user_id, kind) row and returns the raw
 // token to send to the user. Any previous token of the same kind for the user
 // is deleted first so only one outstanding link per kind exists at a time.
-func (s *Service) issueToken(ctx context.Context, userID int64, kind string) (string, error) {
+// targetEmail is stored alongside the token so the confirm step knows which
+// address a verify token was issued for (NULL for the welcome/resend flow,
+// the new address for the email-change flow).
+func (s *Service) issueToken(ctx context.Context, userID int64, kind string, targetEmail string) (string, error) {
 	token, hash, err := newToken()
 	if err != nil {
 		return "", err
@@ -54,9 +57,13 @@ func (s *Service) issueToken(ctx context.Context, userID int64, kind string) (st
 		`DELETE FROM email_tokens WHERE user_id = ? AND kind = ?`, userID, kind); err != nil {
 		return "", err
 	}
+	var target any
+	if targetEmail != "" {
+		target = targetEmail
+	}
 	if _, err := tx.ExecContext(ctx,
-		`INSERT INTO email_tokens (token_hash, user_id, kind, expires_at) VALUES (?, ?, ?, ?)`,
-		hash, userID, kind, time.Now().Add(tokenTTL)); err != nil {
+		`INSERT INTO email_tokens (token_hash, user_id, kind, target_email, expires_at) VALUES (?, ?, ?, ?, ?)`,
+		hash, userID, kind, target, time.Now().Add(tokenTTL)); err != nil {
 		return "", err
 	}
 	if err := tx.Commit(); err != nil {
@@ -66,33 +73,34 @@ func (s *Service) issueToken(ctx context.Context, userID int64, kind string) (st
 }
 
 // consumeToken validates the token (right kind, not expired, user exists) and
-// deletes it. Returns the user_id on success.
-func (s *Service) consumeToken(ctx context.Context, rawToken, kind string) (int64, error) {
+// deletes it. Returns the user_id and (for verify tokens) the target_email the
+// token was issued for — empty string if none.
+func (s *Service) consumeToken(ctx context.Context, rawToken, kind string) (userID int64, targetEmail string, err error) {
 	if rawToken == "" {
-		return 0, ErrTokenInvalid
+		return 0, "", ErrTokenInvalid
 	}
 	hash := hashToken(rawToken)
 	var (
-		userID    int64
 		expiresAt time.Time
+		target   sql.NullString
 	)
-	err := s.db.QueryRowContext(ctx,
-		`SELECT user_id, expires_at FROM email_tokens WHERE token_hash = ? AND kind = ?`,
-		hash, kind).Scan(&userID, &expiresAt)
+	err = s.db.QueryRowContext(ctx,
+		`SELECT user_id, expires_at, target_email FROM email_tokens WHERE token_hash = ? AND kind = ?`,
+		hash, kind).Scan(&userID, &expiresAt, &target)
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, ErrTokenInvalid
+		return 0, "", ErrTokenInvalid
 	}
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 	if time.Now().After(expiresAt) {
 		// Clean up the expired row so the table doesn't accumulate dead tokens.
 		_, _ = s.db.ExecContext(ctx, `DELETE FROM email_tokens WHERE token_hash = ? AND kind = ?`, hash, kind)
-		return 0, ErrTokenInvalid
+		return 0, "", ErrTokenInvalid
 	}
 	if _, err := s.db.ExecContext(ctx,
 		`DELETE FROM email_tokens WHERE token_hash = ? AND kind = ?`, hash, kind); err != nil {
-		return 0, err
+		return 0, "", err
 	}
-	return userID, nil
+	return userID, target.String, nil
 }

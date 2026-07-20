@@ -231,7 +231,10 @@
     "packTitle": "Generated pack",
     "use": "Use",
     "saveAll": "Save all ({{n}})",
-    "packClose": "Dismiss pack"
+    "packClose": "Dismiss pack",
+    "packProOnly": "Setup pack generation is a Pro feature.",
+    "packProOnlyHint": "Upgrade to Pro to generate setup packs.",
+    "goPro": "Upgrade to Pro"
   },
   "goals": {
     "title": "Goal Tracker",
@@ -297,6 +300,19 @@
     "title": "About Apex",
     "p1": "Apex is a companion app for sim racers. It helps you plan and get faster: a fuel & stint calculator, a setup generator, a full season planner, your garage, and season goals — in one place.",
     "p2": "The core tools work without linking any external account. Apex is an independent project and is not affiliated with, endorsed by, or sponsored by iRacing.com Motorsport Simulations, LLC."
+  },
+  "billing": {
+    "title": "Upgrade to Pro",
+    "subtitle": "Unlock advanced race-prep workflows. Start with setup pack generation and upcoming Pro planner expansions.",
+    "currentPlan": "Current plan",
+    "currentPlanHint": "Your active entitlement in Apex.",
+    "freeName": "Free",
+    "proName": "Pro",
+    "currentPlanButton": "Current plan",
+    "loginToUpgrade": "Log in to upgrade",
+    "checkoutSoon": "Checkout is coming soon",
+    "devActivatePro": "Activate Pro (developer)",
+    "devSwitchFree": "Switch to Free (developer)"
   },
   "legal": {
     "updated": "Last updated: {{date}}",

@@ -19,12 +19,12 @@ import (
 
 var (
 	reqTotal = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "apex_http_requests_total",
+		Name: "contentpilot_http_requests_total",
 		Help: "HTTP requests by method, route and status.",
 	}, []string{"method", "route", "status"})
 
 	reqDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "apex_http_request_duration_seconds",
+		Name:    "contentpilot_http_request_duration_seconds",
 		Help:    "HTTP request duration in seconds by method and route.",
 		Buckets: prometheus.DefBuckets,
 	}, []string{"method", "route"})
@@ -81,7 +81,7 @@ var (
 // with the same keys (a Prometheus requirement). This is the generic
 // "any metric" entry point, e.g.:
 //
-//	metrics.Count("apex_setups_generated_total", "Setups generated.",
+//	metrics.Count("contentpilot_setups_generated_total", "Setups generated.",
 //		prometheus.Labels{"kind": "pack"})
 func Count(name, help string, labels prometheus.Labels) {
 	keys := make([]string, 0, len(labels))

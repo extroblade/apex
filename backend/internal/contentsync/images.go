@@ -135,7 +135,7 @@ func (s *Syncer) downloadImage(ctx context.Context, remote, dir, table string) (
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "Apex/1.0 (content sync)")
+	req.Header.Set("User-Agent", "ContentPilot/1.0 (content sync)")
 	req.Header.Set("Referer", "https://www.iracing.com/")
 	resp, err := s.HTTP.Do(req)
 	if err != nil {
@@ -257,7 +257,7 @@ func (s *Syncer) fetchRaw(ctx context.Context, url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "Apex/1.0 (content sync)")
+	req.Header.Set("User-Agent", "ContentPilot/1.0 (content sync)")
 	resp, err := s.HTTP.Do(req)
 	if err != nil {
 		return nil, err

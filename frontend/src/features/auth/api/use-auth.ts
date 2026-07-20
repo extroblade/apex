@@ -146,7 +146,8 @@ export async function downloadAccountExport(): Promise<void> {
   const disposition = res.headers.get('Content-Disposition') ?? '';
   const match = /filename="([^"]+)"/.exec(disposition);
   const filename =
-    match?.[1] ?? `apex-account-export-${new Date().toISOString().slice(0, 10)}.json`;
+    match?.[1] ??
+    `contentpilot-account-export-${new Date().toISOString().slice(0, 10)}.json`;
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

@@ -86,7 +86,7 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 	r.Use(middleware.MaxBody(1 << 20)) // 1 MiB
 
 	// Prometheus exposition. At the root (not under /api) and not proxied by the
-	// frontend nginx, so it's only reachable inside apex-net for scraping.
+	// frontend nginx, so it's only reachable inside contentpilot-net for scraping.
 	r.Handle("/metrics", metrics.Handler())
 
 	r.Route("/api", func(r chi.Router) {

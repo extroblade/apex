@@ -1,7 +1,7 @@
 # Backend stack: MySQL + Go API. Self-contained so it can move to its own
-# repo later. Joins the shared external network `apex-net` so the frontend
+# repo later. Joins the shared external network `contentpilot-net` so the frontend
 # (a separate compose project) can reach the `backend` service by name.
-name: apex-backend
+name: contentpilot-backend
 
 services:
   db:
@@ -15,7 +15,7 @@ services:
     ports:
       # Bound to loopback: reachable for local dev/tools, NOT the host's public
       # interface. For production, drop this mapping entirely (services reach db
-      # over apex-net) and set strong passwords via .env.
+      # over contentpilot-net) and set strong passwords via .env.
       - "127.0.0.1:3306:3306"
     volumes:
       - db_data:/var/lib/mysql
@@ -27,10 +27,10 @@ services:
       timeout: 5s
       retries: 20
     networks:
-      - apex-net
+      - contentpilot-net
 
   # Fail-open cache shared by the API. No external port — only reachable inside
-  # apex-net. If it goes down the app keeps working (reads fall through to MySQL).
+  # contentpilot-net. If it goes down the app keeps working (reads fall through to MySQL).
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -41,7 +41,7 @@ services:
       timeout: 3s
       retries: 10
     networks:
-      - apex-net
+      - contentpilot-net
 
   backend:
     build: .
@@ -75,7 +75,7 @@ services:
       SMTP_PORT: "${SMTP_PORT:-587}"
       SMTP_USER: "${SMTP_USER:-}"
       SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
-      SMTP_FROM: "${SMTP_FROM:-Apex <no-reply@apex.app>}"
+      SMTP_FROM: "${SMTP_FROM:-ContentPilot <no-reply@contentpilot.app>}"
       # Public origin used to build links in transactional emails.
       APP_BASE_URL: "${APP_BASE_URL:-http://localhost:3000}"
       # Stripe billing (Variant A). Empty secret keeps checkout/portal disabled.
@@ -103,7 +103,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - apex-net
+      - contentpilot-net
 
   # Daily season-schedule sync: probes iRacing PDF URLs and scans ./schedules
   # for manually downloaded PDFs, parsing new ones into season_schedule. Also
@@ -135,19 +135,19 @@ services:
       backend:
         condition: service_started
     networks:
-      - apex-net
+      - contentpilot-net
 
 volumes:
   db_data:
-    # Pinned so the compose-project rename (vcapp-backend → apex-backend)
+    # Pinned so the compose-project rename (vcapp-backend → contentpilot-backend)
     # can't silently create a fresh empty volume. dev.sh migrates the old
     # vcapp-backend_db_data contents into this one on first run.
-    name: apex-db-data
+    name: contentpilot-db-data
   media-data:
     # Shared with the static service so rehosted catalog images are served
     # under /media/catalog/* by the frontend nginx proxy.
-    name: apex-media-data
+    name: contentpilot-media-data
 
 networks:
-  apex-net:
+  contentpilot-net:
     external: true

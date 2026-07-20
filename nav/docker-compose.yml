@@ -1,8 +1,8 @@
 # Nav service: owns the app's menu config (nav_items) and serves it at /api/nav.
 # Self-contained so it can move to its own repo later; joins the shared external
-# `apex-net` network so the frontend's nginx can proxy /api/nav to it by name.
+# `contentpilot-net` network so the frontend's nginx can proxy /api/nav to it by name.
 # No external port — only the frontend proxy talks to it.
-name: apex-nav
+name: contentpilot-nav
 
 services:
   nav:
@@ -16,8 +16,8 @@ services:
       DB_PASSWORD: app
       DB_NAME: app
     networks:
-      - apex-net
+      - contentpilot-net
 
 networks:
-  apex-net:
+  contentpilot-net:
     external: true

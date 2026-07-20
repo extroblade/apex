@@ -22,7 +22,7 @@ export function Footer() {
       <p>{t('footer.disclaimer')}</p>
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
         <span>
-          © {year} Apex. {t('footer.rights')}
+          © {year} ContentPilot. {t('footer.rights')}
         </span>
         {links.map((l) => (
           <Link

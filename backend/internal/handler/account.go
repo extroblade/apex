@@ -40,7 +40,7 @@ func (h *Handler) ExportData(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusInternalServerError, errBody(err.Error()))
 		return
 	}
-	filename := "apex-account-export-" + time.Now().UTC().Format("2006-01-02") + ".json"
+	filename := "contentpilot-account-export-" + time.Now().UTC().Format("2006-01-02") + ".json"
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Content-Disposition", `attachment; filename="`+filename+`"`)
 	w.WriteHeader(http.StatusOK)

@@ -86,12 +86,12 @@ func (s *Service) RequestEmailChange(ctx context.Context, userID int64, newEmail
 	}
 	link := fmt.Sprintf("%s/verify-email?token=%s", s.baseURL, token)
 	body := fmt.Sprintf(
-		"Someone requested changing the email on your Apex account to this address.\n\n"+
+		"Someone requested changing the email on your ContentPilot account to this address.\n\n"+
 			"If that was you, confirm it here:\n%s\n\n"+
 			"This link expires in 24 hours. Until you confirm, your current email stays active. "+
 			"If you didn't request this, you can safely ignore this email.\n",
 		link)
-	return s.mailer.Send(ctx, newEmail, "Confirm your new Apex email", body)
+	return s.mailer.Send(ctx, newEmail, "Confirm your new ContentPilot email", body)
 }
 
 // CancelEmailChange clears any staged pending_email and discards any

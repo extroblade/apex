@@ -11,7 +11,7 @@ describe('HomePage', () => {
 
   it('renders the brand and the signed-out tagline in English', () => {
     renderWithProviders(<HomePage />);
-    expect(screen.getByRole('heading', { name: 'Apex' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'ContentPilot' })).toBeInTheDocument();
     expect(
       screen.getByText('Plan races and track your iRacing stats.'),
     ).toBeInTheDocument();

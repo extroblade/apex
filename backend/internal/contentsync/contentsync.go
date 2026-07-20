@@ -111,7 +111,7 @@ func (s *Syncer) fetch(ctx context.Context, url string) (data []byte, hash strin
 	if err != nil {
 		return nil, "", false, err
 	}
-	req.Header.Set("User-Agent", "Apex/1.0 (content sync)")
+	req.Header.Set("User-Agent", "ContentPilot/1.0 (content sync)")
 	resp, err := s.HTTP.Do(req)
 	if err != nil {
 		return nil, "", false, err

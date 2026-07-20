@@ -1,10 +1,10 @@
-# Apex
+# ContentPilot
 
-**Apex** is an iRacing companion app: fuel & stint calculator, season planner,
+**ContentPilot** is an iRacing companion app: fuel & stint calculator, season planner,
 garage, setups showroom, goal tracker, and driver stats. Go + MySQL backend,
 React + TypeScript frontend. Everything is Dockerized.
 
-> **Not affiliated with iRacing.** Apex is an independent project and is not
+> **Not affiliated with iRacing.** ContentPilot is an independent project and is not
 > affiliated with, endorsed by, or sponsored by iRacing.com Motorsport
 > Simulations, LLC. "iRacing" is a trademark of its respective owner, used here
 > only nominatively to describe compatibility. Licensed under [MIT](LICENSE).
@@ -17,9 +17,9 @@ React + TypeScript frontend. Everything is Dockerized.
 - **Frontend** — React + TypeScript, built with [rsbuild](https://rsbuild.dev). Routing via [wouter](https://github.com/molefrog/wouter), client state via [zustand](https://zustand.docs.pmnd.rs), server state via [TanStack Query](https://tanstack.com/query), UI via [shadcn/ui](https://ui.shadcn.com) + Tailwind CSS v4. Organized with [Feature-Sliced Design](https://feature-sliced.design).
 - **Nav** — a small standalone Go service that owns the app's **menu configuration** (`nav_items`) and serves it at `/api/nav`, so navigation is data on the backend rather than hard-coded in the SPA. It needs only MySQL: it serves the menu plus each item's `requiresAuth`/`featureFlag` metadata and lets the client (which already holds the viewer and the flags) filter — navigation isn't a security boundary, since every API route enforces its own auth.
 - **BFF** — a **NestJS Backend-for-Frontend** for a future mobile app. It reshapes the Go API (+ nav) for mobile: e.g. `GET /bff/home` aggregates session + menu + flags into one gated, mobile-shaped payload (fewer round trips, thinner client). It owns no data or auth — it forwards the caller's session cookie/bearer upstream. The web app doesn't use it; the mobile app hits it directly.
-- **Static** — nginx serving generated default avatars and rehosted catalog images (`/media/catalog/*`) from the shared `apex-media-data` volume the scheduler writes to.
+- **Static** — nginx serving generated default avatars and rehosted catalog images (`/media/catalog/*`) from the shared `contentpilot-media-data` volume the scheduler writes to.
 - **i18n** — backend-driven: only `en` is bundled in the app (instant fallback + the translation type); every other language is a row in the `locales` table, served by `GET /api/locales` + `GET /api/locales/{code}`, so a new language ships with **no frontend deploy**.
-- **Metrics** — provider-agnostic. The frontend has a universal counter (`useCounter()` → `counter('event')(params)`, default Yandex Metrica via `PUBLIC_YM_ID`, empty/off by default). The Go backend and the BFF expose Prometheus at `/metrics` (request counters + latency histograms + generic domain counters), scraped internally on `apex-net`.
+- **Metrics** — provider-agnostic. The frontend has a universal counter (`useCounter()` → `counter('event')(params)`, default Yandex Metrica via `PUBLIC_YM_ID`, empty/off by default). The Go backend and the BFF expose Prometheus at `/metrics` (request counters + latency histograms + generic domain counters), scraped internally on `contentpilot-net`.
 - **Database** — MySQL 8.4 (Dockerized).
 - **Cache** — Redis 7 (Dockerized, no external port). A strictly **fail-open** wrapper (`internal/cache`): if Redis is unset or down, reads fall through to MySQL with no error and no stall (300ms op timeout, no retries). Caches feature flags today.
 - **Docker** — the backend (`backend/docker-compose.yml`), frontend (`frontend/docker-compose.yml`), static (`static/docker-compose.yml`), and nav (`nav/docker-compose.yml`) are **separate compose projects** joined by a shared external network, so each can be split into its own repo later. `./dev.sh` runs them all with one command.
@@ -94,10 +94,10 @@ React + TypeScript frontend. Everything is Dockerized.
 ```
 
 The three stacks are separate compose projects on a shared external network
-(`apex-net`, auto-created by the script). Run one on its own if you like:
+(`contentpilot-net`, auto-created by the script). Run one on its own if you like:
 
 ```bash
-docker network create apex-net           # once
+docker network create contentpilot-net           # once
 docker compose -f backend/docker-compose.yml up --build
 ```
 
@@ -114,10 +114,10 @@ GitHub Actions (in `.github/workflows/`) runs on every push to `main` and PR:
 
 | Workflow | What it does |
 | -------- | ------------ |
-| `backend-ci` | `gofmt`, `go vet`, `go test -race -cover`. On `main`/tags, builds & pushes `ghcr.io/<owner>/apex-backend`. |
-| `nav-ci` | Same checks for the nav service. On `main`/tags, builds & pushes `ghcr.io/<owner>/apex-nav`. |
-| `bff-ci` | `tsc` typecheck, ESLint, Prettier, Jest, build for the BFF. On `main`/tags, builds & pushes `ghcr.io/<owner>/apex-bff`. |
-| `frontend-ci` | `tsc` typecheck, ESLint, Prettier check, Vitest, production build. On `main`/tags, builds & pushes `ghcr.io/<owner>/apex-frontend`. |
+| `backend-ci` | `gofmt`, `go vet`, `go test -race -cover`. On `main`/tags, builds & pushes `ghcr.io/<owner>/contentpilot-backend`. |
+| `nav-ci` | Same checks for the nav service. On `main`/tags, builds & pushes `ghcr.io/<owner>/contentpilot-nav`. |
+| `bff-ci` | `tsc` typecheck, ESLint, Prettier, Jest, build for the BFF. On `main`/tags, builds & pushes `ghcr.io/<owner>/contentpilot-bff`. |
+| `frontend-ci` | `tsc` typecheck, ESLint, Prettier check, Vitest, production build. On `main`/tags, builds & pushes `ghcr.io/<owner>/contentpilot-frontend`. |
 | `e2e` | Brings up the full stack (MySQL + backend + static + frontend) via the existing compose files and runs the Playwright suite. Uploads the HTML report as an artifact. |
 
 Docker images are published to the **GitHub Container Registry (GHCR)** using the

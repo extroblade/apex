@@ -21,7 +21,7 @@ type Config struct {
 	Port string // SMTP server port (default "587")
 	User string // SMTP username (empty = no auth, for local MailHog/Mailpit)
 	Pass string // SMTP password
-	From string // From: address (e.g. "Apex <no-reply@apex.app>")
+	From string // From: address (e.g. "ContentPilot <no-reply@contentpilot.app>")
 }
 
 // Mailer sends transactional email. Construct with New; a nil *Mailer or a
@@ -60,7 +60,7 @@ func (m *Mailer) Send(ctx context.Context, to, subject, body string) error {
 
 	from := m.cfg.From
 	if from == "" {
-		from = "no-reply@apex.app"
+		from = "no-reply@contentpilot.app"
 	}
 	// Pull the bare address out of "Name <addr>" for the envelope (SMTP MAIL FROM).
 	fromAddr := stripAngle(from)

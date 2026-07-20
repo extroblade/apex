@@ -15,7 +15,7 @@ import (
 )
 
 // setupsGeneratedTotal is the metric name for generator use, labeled by kind.
-const setupsGeneratedTotal = "apex_setups_generated_total"
+const setupsGeneratedTotal = "contentpilot_setups_generated_total"
 
 // ListSetups returns the showroom (public setups + the caller's own), or only
 // the caller's own when ?mine=1.

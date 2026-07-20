@@ -1,5 +1,5 @@
 export const en = {
-  brand: 'Apex',
+  brand: 'ContentPilot',
   nav: {
     home: 'Home',
     fuel: 'Fuel',
@@ -42,7 +42,7 @@ export const en = {
   auth: {
     logInTitle: 'Log in',
     signUpTitle: 'Create account',
-    welcomeBack: 'Welcome back to Apex.',
+    welcomeBack: 'Welcome back to ContentPilot.',
     startPlanning: 'Start planning your races.',
     email: 'Email',
     password: 'Password',
@@ -303,23 +303,23 @@ export const en = {
   },
   footer: {
     disclaimer:
-      'Apex is an independent project and is not affiliated with, endorsed by, or sponsored by iRacing.com Motorsport Simulations, LLC. "iRacing" is a trademark of its respective owner, used here only to describe compatibility.',
+      'ContentPilot is an independent project and is not affiliated with, endorsed by, or sponsored by iRacing.com Motorsport Simulations, LLC. "iRacing" is a trademark of its respective owner, used here only to describe compatibility.',
     rights: 'All rights reserved.',
     about: 'About',
     terms: 'Terms',
     privacy: 'Privacy',
   },
   about: {
-    title: 'About Apex',
-    p1: 'Apex is a companion app for sim racers. It helps you plan and get faster: a fuel & stint calculator, a setup generator, a full season planner, your garage, and season goals — in one place.',
-    p2: 'The core tools work without linking any external account. Apex is an independent project and is not affiliated with, endorsed by, or sponsored by iRacing.com Motorsport Simulations, LLC.',
+    title: 'About ContentPilot',
+    p1: 'ContentPilot is a companion app for sim racers. It helps you plan and get faster: a fuel & stint calculator, a setup generator, a full season planner, your garage, and season goals — in one place.',
+    p2: 'The core tools work without linking any external account. ContentPilot is an independent project and is not affiliated with, endorsed by, or sponsored by iRacing.com Motorsport Simulations, LLC.',
   },
   billing: {
     title: 'Upgrade to Pro',
     subtitle:
       'Unlock advanced race-prep workflows. Start with setup pack generation and upcoming Pro planner expansions.',
     currentPlan: 'Current plan',
-    currentPlanHint: 'Your active entitlement in Apex.',
+    currentPlanHint: 'Your active entitlement in ContentPilot.',
     status: 'Subscription status',
     renewsOn: 'Renews on {{date}}',
     accessUntil: 'Access until {{date}}',
@@ -340,10 +340,10 @@ export const en = {
       title: 'Terms of Service',
       updated: 'July 2026',
       intro:
-        'These Terms govern your use of Apex (the "Service"). By creating an account or using the Service you agree to them. If you do not agree, do not use the Service.',
+        'These Terms govern your use of ContentPilot (the "Service"). By creating an account or using the Service you agree to them. If you do not agree, do not use the Service.',
       service: {
         h: 'The Service',
-        b: 'Apex is a companion app for sim racers: a fuel & stint calculator, setup generator, season planner, garage, and goal tracking. Some features are offered on a free tier and others as part of a paid subscription.',
+        b: 'ContentPilot is a companion app for sim racers: a fuel & stint calculator, setup generator, season planner, garage, and goal tracking. Some features are offered on a free tier and others as part of a paid subscription.',
       },
       accounts: {
         h: 'Accounts',
@@ -359,7 +359,7 @@ export const en = {
       },
       thirdParty: {
         h: 'Third-party platforms',
-        b: 'Apex is an independent project and is not affiliated with, endorsed by, or sponsored by iRacing.com Motorsport Simulations, LLC. Any third-party names are used only to describe compatibility.',
+        b: 'ContentPilot is an independent project and is not affiliated with, endorsed by, or sponsored by iRacing.com Motorsport Simulations, LLC. Any third-party names are used only to describe compatibility.',
       },
       subscriptions: {
         h: 'Subscriptions',
@@ -378,7 +378,7 @@ export const en = {
       title: 'Privacy Policy',
       updated: 'July 2026',
       intro:
-        'This policy explains what data Apex collects, why, and your choices. We aim to collect only what the Service needs to work.',
+        'This policy explains what data ContentPilot collects, why, and your choices. We aim to collect only what the Service needs to work.',
       collect: {
         h: 'What we collect',
         b: 'Account: your email address and a securely hashed password. Your content: setups, goals, race plans, and garage selections you create. Technical: basic request logs (e.g. IP address, timestamps) needed for security and reliability.',

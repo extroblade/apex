@@ -10,7 +10,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/server ./cmd/server && \
     CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/scheduler ./cmd/scheduler
 
-# Pre-create the media dir so that, when the shared apex-media-data volume first
+# Pre-create the media dir so that, when the shared contentpilot-media-data volume first
 # mounts over /media-data, Docker initializes the (empty) volume with this
 # directory's nonroot ownership — letting the scheduler rehost images into it.
 # The volume root is the catalog dir (see CATALOG_IMAGE_DIR); images go under

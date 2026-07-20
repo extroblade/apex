@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('home page loads with brand and nav', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Apex' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'ContentPilot' })).toBeVisible();
   // `exact` so this matches only the nav link, not the "Fuel Planner" hero card.
   await expect(page.getByRole('link', { name: 'Fuel', exact: true })).toBeVisible();
 });

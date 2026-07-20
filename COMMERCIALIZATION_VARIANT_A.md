@@ -1,4 +1,4 @@
-# Apex — Variant A: Freemium + Pro Subscription
+# ContentPilot — Variant A: Freemium + Pro Subscription
 
 Этот документ фиксирует выбранный вариант коммерциализации, чтобы не терять контекст между чатами.
 

@@ -1,8 +1,8 @@
 {
-  "name": "apex-bff",
+  "name": "contentpilot-bff",
   "version": "0.1.0",
   "private": true,
-  "description": "Backend-for-Frontend for the Apex mobile app: reshapes the Go API for mobile.",
+  "description": "Backend-for-Frontend for the ContentPilot mobile app: reshapes the Go API for mobile.",
   "packageManager": "pnpm@11.14.0",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

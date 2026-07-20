@@ -1,8 +1,8 @@
-# Apex (repo: apex) — project guide
+# ContentPilot (repo: contentpilot) — project guide
 
-**Apex** is an iRacing companion app (fuel calculator, season planner, garage,
+**ContentPilot** is an iRacing companion app (fuel calculator, season planner, garage,
 setups showroom, goal tracker, driver stats). Go + MySQL backend, React +
-TypeScript frontend (rsbuild, Feature-Sliced Design). Everything is Dockerized. The brand is "Apex" (apex-arc
+TypeScript frontend (rsbuild, Feature-Sliced Design). Everything is Dockerized. The brand is "ContentPilot" (arc-through-apex
 logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
 "Racing Planner" is the old name — don't reintroduce it.
 
@@ -18,11 +18,11 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
   the Go API + nav for a future mobile app. Owns no data/auth — forwards the
   caller's auth. `GET /bff/home` (aggregated+gated), `/bff/health`, `/metrics`.
   Web app does NOT use it; the mobile app hits it directly on :8083.
-- The compose projects are **separate**, joined by the external `apex-net`
-  network. Frontend nginx proxies `/api/nav` → nav, `/api` → backend, and
-  `/media` → static, and caches (`media_cache` 7d, `/api/features` 30s).
-  `/api/nav` is a LONGER prefix than `/api/`, which is how nginx splits them —
-  keep that ordering. `/static` is rsbuild's OWN bundle path — never proxy it.
+- The compose projects are **separate**, joined by the external `contentpilot-net`
+ network. Frontend nginx proxies `/api/nav` → nav, `/api` → backend, and
+ `/media` → static, and caches (`media_cache` 7d, `/api/features` 30s).
+ `/api/nav` is a LONGER prefix than `/api/`, which is how nginx splits them —
+ keep that ordering. `/static` is rsbuild's OWN bundle path — never proxy it.
 - `./dev.sh up|down|logs|ps` runs the whole stack (frontend :3000, api :8080,
   bff :8083, mysql :3306).
 
@@ -150,7 +150,7 @@ logo in `frontend/src/shared/ui/logo.tsx`, favicon in `frontend/public/`);
 - **Legacy scrape machinery** (`internal/contentsync/images.go`, `webcatalog.go`)
   still exists but only runs with `IRACING_SCRAPE=1` (default OFF — copyright/ToS
   risk; never enable for the hosted product). If enabled it rehosts images into
-  the `apex-media-data` volume (`CATALOG_IMAGE_DIR=/media-data` = volume ROOT;
+  the `contentpilot-media-data` volume (`CATALOG_IMAGE_DIR=/media-data` = volume ROOT;
   static mounts it at `/usr/share/nginx/html/catalog`; don't double-nest) and
   backfills descriptions from `detail_url` pages. The API would still not serve
   them — the field is gone from the DTOs.

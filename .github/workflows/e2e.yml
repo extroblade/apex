@@ -23,13 +23,13 @@ jobs:
       # The backend auto-runs DB migrations + catalog seed on startup, so the
       # planner endpoints work against a fresh MySQL with no extra step.
       - name: create shared network
-        run: docker network create apex-net
+        run: docker network create contentpilot-net
 
-      # The static service mounts the external apex-media-data volume (normally
+      # The static service mounts the external contentpilot-media-data volume (normally
       # created when the scheduler starts). e2e skips the scheduler, so create
       # the empty volume up front or the static compose fails to start.
       - name: create media volume
-        run: docker volume create --name apex-media-data
+        run: docker volume create --name contentpilot-media-data
 
       - name: start backend (db + api)
         # All e2e traffic comes from one IP; disable the auth rate limiter so the

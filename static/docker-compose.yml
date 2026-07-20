@@ -1,8 +1,8 @@
 # Static asset service (default avatars + rehosted catalog images). Self-contained;
 # joins the shared external network so the frontend's nginx can proxy /media/*
-# to it. Catalog images live in the shared apex-media-data volume written by the
+# to it. Catalog images live in the shared contentpilot-media-data volume written by the
 # scheduler and mounted here at /usr/share/nginx/html/catalog.
-name: apex-static
+name: contentpilot-static
 
 services:
   static:
@@ -11,13 +11,13 @@ services:
     volumes:
       - media-data:/usr/share/nginx/html/catalog:ro
     networks:
-      - apex-net
+      - contentpilot-net
 
 volumes:
   media-data:
     external: true
-    name: apex-media-data
+    name: contentpilot-media-data
 
 networks:
-  apex-net:
+  contentpilot-net:
     external: true

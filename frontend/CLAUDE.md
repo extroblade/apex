@@ -3,7 +3,7 @@
 React 18 + TypeScript, built with **rsbuild**. Routing: wouter. Server state:
 TanStack Query. Client state: zustand. UI: shadcn/ui + Tailwind CSS v4 + clsx.
 
-Brand is **Apex** (`t('brand')`; logo `shared/ui/logo.tsx`; favicon in
+Brand is **ContentPilot** (`t('brand')`; logo `shared/ui/logo.tsx`; favicon in
 `public/`).
 
 **Navigation is backend-driven** — it comes from the nav service (`GET /api/nav`,

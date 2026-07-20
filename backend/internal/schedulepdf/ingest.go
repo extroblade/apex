@@ -80,7 +80,7 @@ func (in *Ingestor) ingestURL(ctx context.Context, url string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", "Apex/1.0 (schedule sync)")
+	req.Header.Set("User-Agent", "ContentPilot/1.0 (schedule sync)")
 	resp, err := in.HTTP.Do(req)
 	if err != nil {
 		return err

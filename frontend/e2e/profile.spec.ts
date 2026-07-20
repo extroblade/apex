@@ -34,5 +34,5 @@ test('user can download their data export from the profile page', async ({ page 
   await page.getByRole('button', { name: 'Download my data' }).click();
   const download = await downloadPromise;
 
-  expect(download.suggestedFilename()).toMatch(/apex-account-export-.*\.json/);
+  expect(download.suggestedFilename()).toMatch(/contentpilot-account-export-.*\.json/);
 });

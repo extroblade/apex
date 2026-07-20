@@ -1,6 +1,7 @@
 # Backend (Go) guide
 
-Go 1.25. Module `apex`. Standard project layout.
+Go 1.25. Module `apex` (deferred rename to `contentpilot` — see rebrand notes).
+Standard project layout.
 
 ## Layout
 

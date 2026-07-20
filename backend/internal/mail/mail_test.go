@@ -8,10 +8,10 @@ import (
 
 func TestStripAngle(t *testing.T) {
 	cases := map[string]string{
-		"Apex <no-reply@apex.app>": "no-reply@apex.app",
-		"plain@apex.app":           "plain@apex.app",
-		"<bare@apex.app>":          "bare@apex.app",
-		"No angle here":            "No angle here",
+		"ContentPilot <no-reply@contentpilot.app>": "no-reply@contentpilot.app",
+		"plain@contentpilot.app":                    "plain@contentpilot.app",
+		"<bare@contentpilot.app>":                   "bare@contentpilot.app",
+		"No angle here": "No angle here",
 	}
 	for in, want := range cases {
 		if got := stripAngle(in); got != want {
@@ -32,11 +32,11 @@ func TestDisabledMailerNoOps(t *testing.T) {
 }
 
 func TestBuildMessageHasHeadersAndBody(t *testing.T) {
-	msg := buildMessage("Apex <no-reply@apex.app>", "user@x.com", "Reset your password", "Click here:\nhttps://app/reset?token=abc")
+	msg := buildMessage("ContentPilot <no-reply@contentpilot.app>", "user@x.com", "Reset your password", "Click here:\nhttps://app/reset?token=abc")
 	s := string(msg)
 	// Headers are RFC 5322 (\r\n-terminated); the body keeps its own newlines.
 	for _, want := range []string{
-		"From: Apex <no-reply@apex.app>\r\n",
+		"From: ContentPilot <no-reply@contentpilot.app>\r\n",
 		"To: user@x.com\r\n",
 		"Subject: Reset your password\r\n",
 		"Content-Type: text/plain; charset=utf-8\r\n",

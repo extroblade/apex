@@ -63,11 +63,11 @@ func (s *Service) CheckoutURL(ctx context.Context, userID int64, email, plan str
 		Mode:              stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 		ClientReferenceID: stripe.String(userRef),
 		Metadata: map[string]string{
-			"apex_user_id": userRef,
+			"contentpilot_user_id": userRef,
 		},
 		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
 			Metadata: map[string]string{
-				"apex_user_id": userRef,
+				"contentpilot_user_id": userRef,
 			},
 		},
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
@@ -278,7 +278,7 @@ func (s *Service) stripeCustomerID(ctx context.Context, userID int64) (string, e
 }
 
 func (s *Service) resolveStripeUserID(ctx context.Context, metadata map[string]string, subscriptionID, customerID, fallbackRef string) (int64, error) {
-	if v := strings.TrimSpace(metadata["apex_user_id"]); v != "" {
+	if v := strings.TrimSpace(metadata["contentpilot_user_id"]); v != "" {
 		id, err := strconv.ParseInt(v, 10, 64)
 		if err == nil && id > 0 {
 			return id, nil

@@ -1,8 +1,8 @@
 # BFF (Backend-for-Frontend) for the future mobile app: reshapes the Go API's
 # data for mobile. Self-contained so it can move to its own repo later; joins the
-# shared external `apex-net` so it can reach the backend by name. It owns no data
+# shared external `contentpilot-net` so it can reach the backend by name. It owns no data
 # and no auth — it forwards the caller's auth to the Go API.
-name: apex-bff
+name: contentpilot-bff
 
 services:
   bff:
@@ -15,8 +15,8 @@ services:
     ports:
       - "8083:8083"
     networks:
-      - apex-net
+      - contentpilot-net
 
 networks:
-  apex-net:
+  contentpilot-net:
     external: true

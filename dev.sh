@@ -13,7 +13,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NET="apex-net"
+NET="contentpilot-net"
 BACKEND="$ROOT/backend/docker-compose.yml"
 STATIC="$ROOT/static/docker-compose.yml"
 NAV="$ROOT/nav/docker-compose.yml"
@@ -28,13 +28,25 @@ ensure_network() {
 }
 
 # One-time data migration from the pre-rename volume (vcapp-backend_db_data)
-# into the pinned apex-db-data volume, so the project rename loses no users.
+# into the pinned contentpilot-db-data volume, so the project rename loses no users.
+# Also migrates the intermediate apex-db-data volume (prior rebrand step) into
+# contentpilot-db-data, so existing local deploys keep their data across the
+# Apex → ContentPilot rename.
 migrate_db_volume() {
+  # vcapp-backend_db_data → contentpilot-db-data (original pre-rename source)
   if docker volume inspect vcapp-backend_db_data >/dev/null 2>&1 \
-     && ! docker volume inspect apex-db-data >/dev/null 2>&1; then
-    echo "› migrating MySQL data: vcapp-backend_db_data → apex-db-data"
-    docker volume create apex-db-data >/dev/null
-    docker run --rm -v vcapp-backend_db_data:/from:ro -v apex-db-data:/to alpine \
+     && ! docker volume inspect contentpilot-db-data >/dev/null 2>&1; then
+    echo "› migrating MySQL data: vcapp-backend_db_data → contentpilot-db-data"
+    docker volume create contentpilot-db-data >/dev/null
+    docker run --rm -v vcapp-backend_db_data:/from:ro -v contentpilot-db-data:/to alpine \
+      sh -c "cp -a /from/. /to/" >/dev/null
+  fi
+  # apex-db-data → contentpilot-db-data (prior rebrand intermediate)
+  if docker volume inspect apex-db-data >/dev/null 2>&1 \
+     && ! docker volume inspect contentpilot-db-data >/dev/null 2>&1; then
+    echo "› migrating MySQL data: apex-db-data → contentpilot-db-data"
+    docker volume create contentpilot-db-data >/dev/null
+    docker run --rm -v apex-db-data:/from:ro -v contentpilot-db-data:/to alpine \
       sh -c "cp -a /from/. /to/" >/dev/null
   fi
 }

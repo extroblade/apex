@@ -31,12 +31,12 @@ func (s *Service) RequestPasswordReset(ctx context.Context, email string) error 
 	}
 	link := fmt.Sprintf("%s/reset-password/confirm?token=%s", s.baseURL, token)
 	body := fmt.Sprintf(
-		"Someone requested a password reset for your Apex account.\n\n"+
+		"Someone requested a password reset for your ContentPilot account.\n\n"+
 			"If that was you, reset it here:\n%s\n\n"+
 			"This link expires in 24 hours. If you didn't request this, you can safely ignore this email — "+
 			"your password is still unchanged.\n",
 		link)
-	return s.mailer.Send(ctx, email, "Reset your Apex password", body)
+	return s.mailer.Send(ctx, email, "Reset your ContentPilot password", body)
 }
 
 // ConfirmPasswordReset verifies the token and sets the new password. It revokes
@@ -99,10 +99,10 @@ func (s *Service) RequestEmailVerification(ctx context.Context, email string) er
 	}
 	link := fmt.Sprintf("%s/verify-email?token=%s", s.baseURL, token)
 	body := fmt.Sprintf(
-		"Welcome to Apex! Confirm your email address to finish signing up:\n%s\n\n"+
-			"This link expires in 24 hours. If you didn't create an Apex account, you can safely ignore this email.\n",
+		"Welcome to ContentPilot! Confirm your email address to finish signing up:\n%s\n\n"+
+			"This link expires in 24 hours. If you didn't create a ContentPilot account, you can safely ignore this email.\n",
 		link)
-	return s.mailer.Send(ctx, email, "Confirm your Apex email", body)
+	return s.mailer.Send(ctx, email, "Confirm your ContentPilot email", body)
 }
 
 // ConfirmEmailVerification validates the token and marks the user's email
@@ -163,8 +163,8 @@ func (s *Service) SendWelcomeVerification(ctx context.Context, userID int64, ema
 	}
 	link := fmt.Sprintf("%s/verify-email?token=%s", s.baseURL, token)
 	body := fmt.Sprintf(
-		"Welcome to Apex! Confirm your email address to finish signing up:\n%s\n\n"+
-			"This link expires in 24 hours. If you didn't create an Apex account, you can safely ignore this email.\n",
+		"Welcome to ContentPilot! Confirm your email address to finish signing up:\n%s\n\n"+
+			"This link expires in 24 hours. If you didn't create a ContentPilot account, you can safely ignore this email.\n",
 		link)
-	_ = s.mailer.Send(ctx, email, "Confirm your Apex email", body)
+	_ = s.mailer.Send(ctx, email, "Confirm your ContentPilot email", body)
 }

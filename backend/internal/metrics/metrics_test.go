@@ -37,17 +37,17 @@ func TestMiddlewareRecordsRequests(t *testing.T) {
 
 func TestCountCreatesAndIncrements(t *testing.T) {
 	labels := prometheus.Labels{"kind": "pack"}
-	Count("apex_test_events_total", "Test events.", labels)
-	Count("apex_test_events_total", "Test events.", labels)
+	Count("contentpilot_test_events_total", "Test events.", labels)
+	Count("contentpilot_test_events_total", "Test events.", labels)
 
-	got := testutil.ToFloat64(counters["apex_test_events_total"].With(labels))
+	got := testutil.ToFloat64(counters["contentpilot_test_events_total"].With(labels))
 	if got != 2 {
 		t.Errorf("count = %v, want 2", got)
 	}
 }
 
 func TestHandlerServesExposition(t *testing.T) {
-	Count("apex_exposition_probe_total", "Probe.", prometheus.Labels{"x": "y"})
+	Count("contentpilot_exposition_probe_total", "Probe.", prometheus.Labels{"x": "y"})
 
 	rec := httptest.NewRecorder()
 	Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/metrics", nil))
@@ -55,7 +55,7 @@ func TestHandlerServesExposition(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200", rec.Code)
 	}
-	if !strings.Contains(rec.Body.String(), "apex_exposition_probe_total") {
+	if !strings.Contains(rec.Body.String(), "contentpilot_exposition_probe_total") {
 		t.Errorf("exposition missing the domain counter")
 	}
 }

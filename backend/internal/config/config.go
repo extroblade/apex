@@ -48,7 +48,7 @@ type Config struct {
 	SMTPPassword string
 	SMTPFrom     string
 	// AppBaseURL is the public origin used to build links in transactional
-	// emails (e.g. "https://apex.app"). Defaults to http://localhost:3000 for
+	// emails (e.g. "https://contentpilot.app"). Defaults to http://localhost:3000 for
 	// local dev so the links land on the dev frontend.
 	AppBaseURL string
 	// Stripe billing settings for Variant A subscriptions.

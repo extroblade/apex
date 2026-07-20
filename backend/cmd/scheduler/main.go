@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"apex/internal/auth"
 	"apex/internal/config"
 	"apex/internal/contentsync"
 	"apex/internal/db"
@@ -63,6 +64,23 @@ func main() {
 		for {
 			syncer.Run(context.Background())
 			time.Sleep(contentInterval)
+		}
+	}()
+
+	// Expired-token/session purge runs hourly so the email_tokens and sessions
+	// tables don't accumulate dead rows. Both deletes are bounded and
+	// idempotent; a failure just logs and retries next tick.
+	purgeInterval := durationEnv("PURGE_INTERVAL", time.Hour, time.Minute)
+	authSvc := auth.NewService(database)
+	go func() {
+		for {
+			tokens, sessions, err := authSvc.PurgeExpired(context.Background())
+			if err != nil {
+				log.Printf("purge: %v", err)
+			} else if tokens+sessions > 0 {
+				log.Printf("purge: deleted %d expired tokens, %d expired sessions", tokens, sessions)
+			}
+			time.Sleep(purgeInterval)
 		}
 	}()
 

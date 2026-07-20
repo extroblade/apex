@@ -224,6 +224,31 @@ func TestPendingEmail_ReturnsStaged(t *testing.T) {
 	}
 }
 
+// PurgeExpired deletes expired email tokens and sessions.
+func TestPurgeExpired_DeletesExpired(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	defer db.Close()
+	mock.ExpectExec("DELETE FROM email_tokens WHERE expires_at <= NOW\\(\\)").
+		WillReturnResult(sqlmock.NewResult(0, 3))
+	mock.ExpectExec("DELETE FROM sessions WHERE expires_at <= NOW\\(\\)").
+		WillReturnResult(sqlmock.NewResult(0, 7))
+
+	s := &Service{db: db}
+	tokens, sessions, err := s.PurgeExpired(context.Background())
+	if err != nil {
+		t.Fatalf("err = %v", err)
+	}
+	if tokens != 3 {
+		t.Errorf("tokens = %d, want 3", tokens)
+	}
+	if sessions != 7 {
+		t.Errorf("sessions = %d, want 7", sessions)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Error(err)
+	}
+}
+
 // ExportData assembles the user's data. Verifies the profile section is read
 // and the iRacing link is omitted when not linked.
 func TestExportData_ProfileAndNoIRacing(t *testing.T) {

@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'wouter';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Wand2, Layers, X } from 'lucide-react';
 
 import { useCars, useTracks } from '@/entities/planner';
+import { useSubscription } from '@/entities/subscription';
 import {
   useCreateSetup,
   useGenerateSetup,
@@ -68,9 +70,11 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
 
   const generate = useGenerateSetup();
   const generatePack = useGenerateSetupPack();
+  const subscription = useSubscription();
   const counter = useCounter();
   const carId = watch('carId');
   const trackId = watch('trackId');
+  const hasPro = Boolean(subscription.data?.pro);
 
   // The generated pack (skill × session variants) shown for review, if any.
   const [pack, setPack] = useState<GeneratedVariant[] | null>(null);
@@ -271,14 +275,28 @@ export function SetupForm({ onCreated }: { onCreated?: () => void }) {
         <Button
           type="button"
           variant="outline"
-          disabled={!carId || generatePack.isPending}
-          title={carId ? t('setups.packHint') : t('setups.selectCar')}
+          disabled={!carId || !hasPro || generatePack.isPending}
+          title={
+            !carId
+              ? t('setups.selectCar')
+              : hasPro
+                ? t('setups.packHint')
+                : t('setups.packProOnlyHint')
+          }
           onClick={onGeneratePack}
         >
           <Layers className="size-4" />
           {generatePack.isPending ? t('common.loading') : t('setups.generatePack')}
         </Button>
       </div>
+      {!hasPro && (
+        <p className="text-sm text-muted-foreground">
+          {t('setups.packProOnly')}{' '}
+          <Link href="/upgrade" className="text-primary underline underline-offset-4">
+            {t('setups.goPro')}
+          </Link>
+        </p>
+      )}
 
       {pack && pack.length > 0 && (
         <PackPanel

@@ -12,6 +12,7 @@ import (
 	"apex/internal/locales"
 	"apex/internal/racing"
 	"apex/internal/setups"
+	"apex/internal/subscription"
 )
 
 // Handler carries dependencies shared by the HTTP handlers.
@@ -23,6 +24,7 @@ type Handler struct {
 	Setups       *setups.Service
 	Goals        *goals.Service
 	Locales      *locales.Service
+	Subscription *subscription.Service
 	Cache        *cache.Cache // optional; nil-safe (fail-open)
 	CookieSecure bool
 	DeveloperKey string

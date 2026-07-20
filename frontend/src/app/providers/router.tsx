@@ -17,6 +17,7 @@ import { DriverProfilePage } from '@/pages/driver-profile';
 import { ProfilePage } from '@/pages/profile';
 import { AboutPage } from '@/pages/about';
 import { TermsPage, PrivacyPage } from '@/pages/legal';
+import { UpgradePage } from '@/pages/upgrade';
 
 export function AppRouter() {
   return (
@@ -37,6 +38,7 @@ export function AppRouter() {
       <Route path="/reset-password/confirm" component={ResetPasswordConfirmPage} />
       <Route path="/verify-email" component={VerifyEmailPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/upgrade" component={UpgradePage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />

@@ -246,6 +246,9 @@ export const ru: Translation = {
     use: 'Взять',
     saveAll: 'Сохранить все ({{n}})',
     packClose: 'Закрыть пак',
+    packProOnly: 'Генерация пака сетапов доступна только в Pro.',
+    packProOnlyHint: 'Перейдите на Pro, чтобы генерировать паки сетапов.',
+    goPro: 'Перейти на Pro',
   },
   goals: {
     title: 'Трекер целей',
@@ -312,6 +315,20 @@ export const ru: Translation = {
     title: 'О проекте Apex',
     p1: 'Apex — приложение-компаньон для сим-рейсеров. Оно помогает планировать и ехать быстрее: калькулятор топлива и отрезков, генератор сетапов, планировщик сезона, гараж и цели на сезон — в одном месте.',
     p2: 'Основные инструменты работают без привязки внешних аккаунтов. Apex — независимый проект, не аффилированный с iRacing.com Motorsport Simulations, LLC, не одобрен и не спонсируется ими.',
+  },
+  billing: {
+    title: 'Переход на Pro',
+    subtitle:
+      'Откройте расширенные сценарии подготовки к гонкам. Сейчас — генерация паков сетапов, далее — расширения планировщика Pro.',
+    currentPlan: 'Текущий тариф',
+    currentPlanHint: 'Ваш активный уровень доступа в Apex.',
+    freeName: 'Free',
+    proName: 'Pro',
+    currentPlanButton: 'Текущий тариф',
+    loginToUpgrade: 'Войдите, чтобы обновить тариф',
+    checkoutSoon: 'Оплата скоро появится',
+    devActivatePro: 'Активировать Pro (developer)',
+    devSwitchFree: 'Переключить на Free (developer)',
   },
   legal: {
     updated: 'Обновлено: {{date}}',

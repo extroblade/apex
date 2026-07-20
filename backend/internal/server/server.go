@@ -24,6 +24,7 @@ import (
 	"apex/internal/racing"
 	"apex/internal/secretbox"
 	"apex/internal/setups"
+	"apex/internal/subscription"
 )
 
 // iracingFlag gates all iRacing-OAuth-dependent routes.
@@ -52,11 +53,14 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 	h.Setups = setups.New(db)
 	h.Goals = goals.New(db)
 	h.Locales = locales.New(db)
+	h.Subscription = subscription.New(db)
 	h.Cache = redisCache
 	h.DeveloperKey = cfg.DeveloperKey
 
 	// requireIRacing 404s OAuth-dependent routes when the feature flag is off.
 	requireIRacing := requireFeature(featuresSvc, iracingFlag)
+	// requirePro gates paid-only capabilities.
+	requirePro := requireProPlan(h.Subscription)
 
 	r := chi.NewRouter()
 	r.Use(chimw.RequestID)
@@ -134,6 +138,15 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 			})
 		})
 
+		// Billing API (Variant A foundation): public plans + caller subscription.
+		r.Get("/billing/plans", h.BillingPlans)
+		r.Route("/billing", func(r chi.Router) {
+			r.Use(middleware.RequireAuth)
+			r.Get("/subscription", h.MySubscription)
+			// Temporary dev-only tier switch until Stripe checkout/webhooks are wired.
+			r.Put("/dev/tier", h.DevSetTier)
+		})
+
 		// Planner works WITHOUT iRacing (catalog is seeded); only the live sync
 		// from iRacing is gated behind the flag.
 		r.Route("/planner", func(r chi.Router) {
@@ -158,7 +171,7 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 			r.Get("/", h.ListSetups)
 			r.Post("/", h.CreateSetup)
 			r.Post("/generate", h.GenerateSetup)
-			r.Post("/generate/pack", h.GenerateSetupPack)
+			r.With(requirePro).Post("/generate/pack", h.GenerateSetupPack)
 			r.Get("/{id}", h.GetSetup)
 			r.Put("/{id}/public", h.SetSetupPublic)
 			r.Delete("/{id}", h.DeleteSetup)
@@ -207,6 +220,29 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 	})
 
 	return r
+}
+
+// requireProPlan returns 402 when the caller is authenticated but lacks a Pro
+// entitlement snapshot. Use it only on routes already guarded by RequireAuth.
+func requireProPlan(sub *subscription.Service) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if sub == nil {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(`{"error":"subscription service unavailable"}`))
+				return
+			}
+			user, ok := auth.UserFromContext(r.Context())
+			if !ok || !sub.HasPro(r.Context(), user.ID) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusPaymentRequired)
+				_, _ = w.Write([]byte(`{"error":"pro subscription required"}`))
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 // requireFeature is chi middleware that 404s a route when a flag is off.

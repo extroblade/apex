@@ -81,18 +81,6 @@ func (h *Handler) CancelEmailChange(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// PendingEmail reports the staged new email for the authenticated user ("" if
-// none). The profile page uses it to show "verification pending for X".
-func (h *Handler) PendingEmail(w http.ResponseWriter, r *http.Request) {
-	user, _ := auth.UserFromContext(r.Context())
-	pending, err := h.Auth.PendingEmail(r.Context(), user.ID)
-	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, errBody(err.Error()))
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]string{"pendingEmail": pending})
-}
-
 // emailChangeStatus maps email-change errors to HTTP status codes. Reuses
 // authStatus for the shared credential/validation cases.
 func emailChangeStatus(err error) int {

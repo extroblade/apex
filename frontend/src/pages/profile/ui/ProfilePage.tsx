@@ -5,6 +5,7 @@ import { useTranslation } from '@/shared/i18n';
 import { ProfileSettings } from '@/features/profile';
 import { ThemeConfigurator } from '@/features/customize-theme';
 import { VerifyEmailBanner } from '@/features/auth';
+import { AccountLifecycle } from '@/features/account-lifecycle';
 import { Button } from '@/shared/ui/button';
 import {
   Card,
@@ -45,6 +46,7 @@ export function ProfilePage() {
       <VerifyEmailBanner />
       <ProfileSettings />
       <ThemeConfigurator />
+      <AccountLifecycle />
     </div>
   );
 }

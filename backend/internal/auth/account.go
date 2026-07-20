@@ -126,6 +126,27 @@ func (s *Service) PendingEmail(ctx context.Context, userID int64) (string, error
 	return pending.String, nil
 }
 
+// PurgeExpired removes email tokens and sessions that are past their expiry.
+// Returns the number of rows deleted (tokens, then sessions). Safe to run on
+// a schedule; both deletes are bounded and idempotent. This is the "expired-row
+// purge" from the security/ops roadmap slice — keeps the tables from
+// accumulating dead tokens/sessions over time.
+func (s *Service) PurgeExpired(ctx context.Context) (tokens, sessions int64, err error) {
+	res, err := s.db.ExecContext(ctx,
+		`DELETE FROM email_tokens WHERE expires_at <= NOW()`)
+	if err != nil {
+		return 0, 0, err
+	}
+	tokens, _ = res.RowsAffected()
+	res, err = s.db.ExecContext(ctx,
+		`DELETE FROM sessions WHERE expires_at <= NOW()`)
+	if err != nil {
+		return tokens, 0, err
+	}
+	sessions, _ = res.RowsAffected()
+	return tokens, sessions, nil
+}
+
 // AccountData is the user's full data export (GDPR). All collections are
 // user-owned rows only; nothing from other users is included. The struct is
 // JSON-marshaled as the export response body.

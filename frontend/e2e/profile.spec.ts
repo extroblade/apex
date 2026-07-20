@@ -23,8 +23,9 @@ test('user can download their data export from the profile page', async ({ page 
 
   await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
 
-  // The "Your data" card should be visible, with a download button.
-  await expect(page.getByRole('heading', { name: 'Your data' })).toBeVisible();
+  // The "Your data" card title is a styled div (not a heading), so locate
+  // it by text. The download button is the only "Download my data" button.
+  await expect(page.getByText('Your data')).toBeVisible();
 
   // Set up a download listener before clicking, since the download starts
   // immediately on click.

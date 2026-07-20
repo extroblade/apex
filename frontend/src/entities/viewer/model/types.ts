@@ -4,5 +4,6 @@ export interface Viewer {
   email: string;
   nickname: string;
   avatarUrl: string;
+  emailVerified: boolean;
   createdAt: string;
 }

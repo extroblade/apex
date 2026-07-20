@@ -39,6 +39,18 @@ type Config struct {
 	// AuthRateLimit is the max register/login attempts per IP per minute.
 	// <= 0 disables the limiter (used in tests/e2e where all traffic is one IP).
 	AuthRateLimit int
+	// SMTP settings for transactional email (password reset, email
+	// verification). Empty Host disables the mailer — the auth flows still
+	// run but no mail is delivered (dev/test without an SMTP server).
+	SMTPHost     string
+	SMTPPort     string
+	SMTPUser     string
+	SMTPPassword string
+	SMTPFrom     string
+	// AppBaseURL is the public origin used to build links in transactional
+	// emails (e.g. "https://apex.app"). Defaults to http://localhost:3000 for
+	// local dev so the links land on the dev frontend.
+	AppBaseURL string
 }
 
 // Load reads configuration from the environment, applying sensible defaults.
@@ -61,6 +73,12 @@ func Load() *Config {
 		DeveloperKey:        env("DEVELOPER_KEY", ""),
 		RedisAddr:           env("REDIS_ADDR", ""),
 		AuthRateLimit:       envInt("AUTH_RATE_LIMIT", 20),
+		SMTPHost:            env("SMTP_HOST", ""),
+		SMTPPort:            env("SMTP_PORT", "587"),
+		SMTPUser:            env("SMTP_USER", ""),
+		SMTPPassword:        env("SMTP_PASSWORD", ""),
+		SMTPFrom:            env("SMTP_FROM", ""),
+		AppBaseURL:          env("APP_BASE_URL", "http://localhost:3000"),
 	}
 	if cfg.DeveloperKey == "3" {
 		// The compose default is a convenience for local dev, but it's a known

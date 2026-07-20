@@ -3,6 +3,8 @@ import { Route, Switch } from 'wouter';
 import { HomePage } from '@/pages/home';
 import { FuelPage } from '@/pages/fuel';
 import { LoginPage } from '@/pages/login';
+import { ResetPasswordPage, ResetPasswordConfirmPage } from '@/pages/reset-password';
+import { VerifyEmailPage } from '@/pages/verify-email';
 import { DashboardPage } from '@/pages/dashboard';
 import { ComparePage } from '@/pages/compare';
 import { PlannerPage } from '@/pages/planner';
@@ -31,6 +33,9 @@ export function AppRouter() {
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/compare" component={ComparePage} />
       <Route path="/login" component={LoginPage} />
+      <Route path="/reset-password" component={ResetPasswordPage} />
+      <Route path="/reset-password/confirm" component={ResetPasswordConfirmPage} />
+      <Route path="/verify-email" component={VerifyEmailPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/terms" component={TermsPage} />

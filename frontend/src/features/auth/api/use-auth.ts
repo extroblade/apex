@@ -34,3 +34,55 @@ export function useLogout() {
     onSuccess: () => qc.setQueryData(viewerKeys.me, null),
   });
 }
+
+/** Request a password-reset link be emailed. Always 204 — the API never
+ * reveals whether the email belongs to an account. */
+export function useRequestPasswordReset() {
+  return useMutation({
+    mutationFn: (email: string) =>
+      apiFetch<void>('/api/auth/password-reset/request', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }),
+  });
+}
+
+/** Confirm a password reset with the token from the email + a new password. */
+export function useConfirmPasswordReset() {
+  return useMutation({
+    mutationFn: (input: { token: string; newPassword: string }) =>
+      apiFetch<void>('/api/auth/password-reset/confirm', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      }),
+  });
+}
+
+/** Request a verification link be emailed to `email` (pre-login resend form). */
+export function useRequestEmailVerification() {
+  return useMutation({
+    mutationFn: (email: string) =>
+      apiFetch<void>('/api/auth/verify-email/request', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }),
+  });
+}
+
+/** Confirm an email verification with the token from the email link. */
+export function useConfirmEmailVerification() {
+  return useMutation({
+    mutationFn: (token: string) =>
+      apiFetch<void>(`/api/auth/verify-email?token=${encodeURIComponent(token)}`, {
+        method: 'GET',
+      }),
+  });
+}
+
+/** Resend the verification email for the logged-in user (profile banner). */
+export function useResendEmailVerification() {
+  return useMutation({
+    mutationFn: () =>
+      apiFetch<void>('/api/auth/verify-email/resend', { method: 'POST' }),
+  });
+}

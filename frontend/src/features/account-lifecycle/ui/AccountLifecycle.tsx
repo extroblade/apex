@@ -199,7 +199,9 @@ function DeleteAccountCard() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{t('profile.deleteAccountConfirmTitle')}</DialogTitle>
-              <DialogDescription>{t('profile.deleteAccountConfirmBody')}</DialogDescription>
+              <DialogDescription>
+                {t('profile.deleteAccountConfirmBody')}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={onConfirm} className="space-y-4">
               <div className="space-y-1.5">

@@ -93,7 +93,8 @@ export const en = {
     signInRequired: 'Sign in required',
     signInToManage: 'Log in to manage your profile.',
     changeEmail: 'Change email',
-    changeEmailHint: 'We’ll send a verification link to the new address. Your current email stays active until you confirm.',
+    changeEmailHint:
+      'We’ll send a verification link to the new address. Your current email stays active until you confirm.',
     newEmail: 'New email',
     requestEmailChange: 'Send verification link',
     emailChangeRequested: 'Verification link sent. Check the new inbox.',
@@ -101,14 +102,17 @@ export const en = {
     cancelEmailChange: 'Cancel email change',
     emailChangeCanceled: 'Email change canceled.',
     dataExport: 'Your data',
-    dataExportHint: 'Download a JSON file with everything we store about your account (profile, garage, plans, setups, goals).',
+    dataExportHint:
+      'Download a JSON file with everything we store about your account (profile, garage, plans, setups, goals).',
     exportData: 'Download my data',
     exportFailed: 'Export failed. Please try again.',
     dangerZone: 'Danger zone',
-    dangerZoneHint: 'Deleting your account is permanent and cannot be undone. All your data is removed.',
+    dangerZoneHint:
+      'Deleting your account is permanent and cannot be undone. All your data is removed.',
     deleteAccount: 'Delete account',
     deleteAccountConfirmTitle: 'Delete your account?',
-    deleteAccountConfirmBody: 'This permanently deletes your account and everything in it — garage, plans, setups, goals. This cannot be undone. Type your password to confirm.',
+    deleteAccountConfirmBody:
+      'This permanently deletes your account and everything in it — garage, plans, setups, goals. This cannot be undone. Type your password to confirm.',
     deleteAccountConfirm: 'Delete permanently',
     deleteAccountPasswordLabel: 'Your password',
     deleteAccountSuccess: 'Account deleted. Sorry to see you go.',
@@ -328,7 +332,7 @@ export const en = {
       },
       acceptable: {
         h: 'Acceptable use',
-        b: 'Do not misuse the Service: no unlawful activity, no attempts to break, overload, or reverse-engineer it, and no infringement of others\' rights.',
+        b: "Do not misuse the Service: no unlawful activity, no attempts to break, overload, or reverse-engineer it, and no infringement of others' rights.",
       },
       thirdParty: {
         h: 'Third-party platforms',

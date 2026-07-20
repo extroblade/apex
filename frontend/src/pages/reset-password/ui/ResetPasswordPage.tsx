@@ -63,7 +63,9 @@ export function ResetPasswordPage() {
                 {...field('email')}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{t(errors.email.message ?? '')}</p>
+                <p className="text-sm text-destructive">
+                  {t(errors.email.message ?? '')}
+                </p>
               )}
             </div>
             {req.error && (

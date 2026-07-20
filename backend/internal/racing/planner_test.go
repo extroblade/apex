@@ -18,9 +18,9 @@ func TestCars_FreeReportedAsOwned(t *testing.T) {
 	mock.ExpectQuery("SELECT c.car_id, c.car_name, c.category, c.description, c.is_free,").
 		WithArgs(int64(7)).
 		WillReturnRows(sqlmock.NewRows([]string{"car_id", "car_name", "category", "description", "is_free", "owned"}).
-			AddRow(1, "Spec Racer Ford", "road", "", true, true).   // free, no ownership row → owned
+			AddRow(1, "Spec Racer Ford", "road", "", true, true).            // free, no ownership row → owned
 			AddRow(2, "Skip Barber Formula 2000", "road", "", false, false). // paid, no ownership → not owned
-			AddRow(3, "Formula Vee", "road", "", false, true))      // paid, owned → owned
+			AddRow(3, "Formula Vee", "road", "", false, true))               // paid, owned → owned
 
 	s := NewService(db, nil, func() APIClient { return &fakeClient{} }, iracing.OAuthConfig{})
 	items, err := s.Cars(context.Background(), 7)

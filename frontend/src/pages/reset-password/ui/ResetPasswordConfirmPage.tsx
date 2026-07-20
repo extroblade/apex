@@ -93,7 +93,9 @@ export function ResetPasswordConfirmPage() {
               )}
             </div>
             {confirm.error && (
-              <p className="text-sm text-destructive">{(confirm.error as Error).message}</p>
+              <p className="text-sm text-destructive">
+                {(confirm.error as Error).message}
+              </p>
             )}
             <Button type="submit" className="w-full" disabled={confirm.isPending}>
               {confirm.isPending ? t('auth.pleaseWait') : t('auth.resetConfirmButton')}

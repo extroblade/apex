@@ -2,6 +2,7 @@
 export interface Viewer {
   id: number;
   email: string;
+  pendingEmail?: string;
   nickname: string;
   avatarUrl: string;
   emailVerified: boolean;

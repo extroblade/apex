@@ -25,6 +25,7 @@ const (
 type User struct {
 	ID            int64     `json:"id"`
 	Email         string    `json:"email"`
+	PendingEmail  string    `json:"pendingEmail,omitempty"`
 	Nickname      string    `json:"nickname"`
 	AvatarURL     string    `json:"avatarUrl"` // a data: URL, or "" if unset
 	EmailVerified bool      `json:"emailVerified"`

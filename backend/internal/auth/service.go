@@ -72,15 +72,17 @@ func (s *Service) Login(ctx context.Context, email, password string) (token stri
 	var (
 		hash     string
 		avatar   sql.NullString
+		pending  sql.NullString
 		verified bool
 	)
 	err = s.db.QueryRowContext(ctx,
-		`SELECT id, email, nickname, avatar_data_url, password_hash, email_verified, created_at FROM users WHERE email = ?`, email).
-		Scan(&user.ID, &user.Email, &user.Nickname, &avatar, &hash, &verified, &user.CreatedAt)
+		`SELECT id, email, pending_email, nickname, avatar_data_url, password_hash, email_verified, created_at FROM users WHERE email = ?`, email).
+		Scan(&user.ID, &user.Email, &pending, &user.Nickname, &avatar, &hash, &verified, &user.CreatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", User{}, ErrInvalidCredentials
 	}
 	user.AvatarURL = avatar.String
+	user.PendingEmail = pending.String
 	user.EmailVerified = verified
 	if err != nil {
 		return "", User{}, err
@@ -105,7 +107,7 @@ func (s *Service) Authenticate(ctx context.Context, token string) (User, error) 
 	}
 
 	row := s.db.QueryRowContext(ctx, `
-		SELECT u.id, u.email, u.nickname, u.avatar_data_url, u.email_verified, u.created_at
+		SELECT u.id, u.email, u.pending_email, u.nickname, u.avatar_data_url, u.email_verified, u.created_at
 		FROM sessions s
 		JOIN users u ON u.id = s.user_id
 		WHERE s.token_hash = ? AND s.expires_at > NOW()`,
@@ -146,17 +148,20 @@ func (s *Service) createSession(ctx context.Context, userID int64) (string, erro
 
 func (s *Service) userByID(ctx context.Context, id int64) (User, error) {
 	return scanUser(s.db.QueryRowContext(ctx,
-		`SELECT id, email, nickname, avatar_data_url, email_verified, created_at FROM users WHERE id = ?`, id))
+		`SELECT id, email, pending_email, nickname, avatar_data_url, email_verified, created_at FROM users WHERE id = ?`, id))
 }
 
-// scanUser reads the standard user column order, handling the nullable avatar.
+// scanUser reads the standard user column order, handling the nullable avatar
+// and pending_email.
 func scanUser(row interface{ Scan(dest ...any) error }) (User, error) {
 	var (
-		u      User
-		avatar sql.NullString
+		u       User
+		avatar  sql.NullString
+		pending sql.NullString
 	)
-	err := row.Scan(&u.ID, &u.Email, &u.Nickname, &avatar, &u.EmailVerified, &u.CreatedAt)
+	err := row.Scan(&u.ID, &u.Email, &pending, &u.Nickname, &avatar, &u.EmailVerified, &u.CreatedAt)
 	u.AvatarURL = avatar.String
+	u.PendingEmail = pending.String
 	return u, err
 }
 

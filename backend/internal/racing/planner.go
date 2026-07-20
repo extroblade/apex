@@ -109,7 +109,7 @@ func (s *Service) SyncCatalog(ctx context.Context, userID int64) (CatalogCounts,
 func (s *Service) Cars(ctx context.Context, userID int64) ([]CarItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT c.car_id, c.car_name, c.category, c.description, c.is_free,
-		       o.car_id IS NOT NULL AS owned
+		       (o.car_id IS NOT NULL OR c.is_free = 1) AS owned
 		FROM cars c
 		LEFT JOIN owned_cars o ON o.car_id = c.car_id AND o.user_id = ?
 		ORDER BY c.car_name`, userID)
@@ -132,7 +132,7 @@ func (s *Service) Cars(ctx context.Context, userID int64) ([]CarItem, error) {
 func (s *Service) Tracks(ctx context.Context, userID int64) ([]TrackItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT t.track_id, t.track_name, t.config_name, t.category, t.description, t.is_free,
-		       o.track_id IS NOT NULL AS owned
+		       (o.track_id IS NOT NULL OR t.is_free = 1) AS owned
 		FROM tracks t
 		LEFT JOIN owned_tracks o ON o.track_id = t.track_id AND o.user_id = ?
 		ORDER BY t.track_name, t.config_name`, userID)

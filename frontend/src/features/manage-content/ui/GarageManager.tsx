@@ -57,6 +57,10 @@ function CarsPanel() {
     category: c.category,
     description: c.description,
     checked: c.owned,
+    // Free cars are owned by everyone — show as checked + read-only with a
+    // "Free" badge so the user can't try to "unown" them.
+    disabled: c.free,
+    free: c.free,
   }));
   return (
     <CatalogList
@@ -74,7 +78,9 @@ function TracksPanel() {
   // iRacing sells a track as one package (all its configs at once), so we show a
   // single row per base track — no per-layout duplicates — and list the layouts
   // in the info dialog. Owning is per-config under the hood, so toggling the row
-  // toggles every config of that track together.
+  // toggles every config of that track together. A track is "free" (and thus
+  // read-only checked) when ANY of its configs is free — iRacing's free tracks
+  // are free across all their layouts.
   const { rows, configsByGroup } = useMemo(() => {
     const groups = new Map<
       string,
@@ -83,6 +89,7 @@ function TracksPanel() {
         configs: number[];
         layouts: { name: string; free?: boolean }[];
         owned: boolean;
+        free: boolean;
       }
     >();
     for (const t of tracks.data ?? []) {
@@ -91,12 +98,14 @@ function TracksPanel() {
         g.configs.push(t.trackId);
         if (t.configName) g.layouts.push({ name: t.configName, free: t.free });
         g.owned = g.owned || t.owned;
+        g.free = g.free || t.free;
       } else {
         groups.set(t.trackName, {
           rep: t,
           configs: [t.trackId],
           layouts: t.configName ? [{ name: t.configName, free: t.free }] : [],
           owned: t.owned,
+          free: t.free,
         });
       }
     }
@@ -111,6 +120,8 @@ function TracksPanel() {
         description: g.rep.description,
         layouts: g.layouts,
         checked: g.owned,
+        disabled: g.free,
+        free: g.free,
       });
     }
     return { rows, configsByGroup };

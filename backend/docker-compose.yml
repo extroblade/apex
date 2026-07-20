@@ -78,6 +78,13 @@ services:
       SMTP_FROM: "${SMTP_FROM:-Apex <no-reply@apex.app>}"
       # Public origin used to build links in transactional emails.
       APP_BASE_URL: "${APP_BASE_URL:-http://localhost:3000}"
+      # Stripe billing (Variant A). Empty secret keeps checkout/portal disabled.
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY:-}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET:-}"
+      STRIPE_PRO_PRICE_ID: "${STRIPE_PRO_PRICE_ID:-}"
+      STRIPE_SUCCESS_URL: "${STRIPE_SUCCESS_URL:-http://localhost:3000/upgrade?checkout=success}"
+      STRIPE_CANCEL_URL: "${STRIPE_CANCEL_URL:-http://localhost:3000/upgrade?checkout=cancel}"
+      STRIPE_PORTAL_RETURN_URL: "${STRIPE_PORTAL_RETURN_URL:-http://localhost:3000/upgrade}"
       # Encrypts stored iRacing refresh tokens at rest (AES-256-GCM). Empty =
       # iRacing linking stays disabled (it's flag-gated off anyway). NEVER commit
       # a real key — set it in a gitignored .env: head -c 32 /dev/urandom | base64

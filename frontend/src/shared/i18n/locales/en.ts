@@ -324,6 +324,8 @@ export const en = {
     proName: 'Pro',
     currentPlanButton: 'Current plan',
     loginToUpgrade: 'Log in to upgrade',
+    startCheckout: 'Upgrade now',
+    manageBilling: 'Manage billing',
     checkoutSoon: 'Checkout is coming soon',
     devActivatePro: 'Activate Pro (developer)',
     devSwitchFree: 'Switch to Free (developer)',

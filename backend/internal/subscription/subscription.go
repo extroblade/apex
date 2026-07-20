@@ -25,10 +25,17 @@ var ErrInvalidTier = errors.New("invalid plan tier")
 
 // Service manages subscription reads/writes.
 type Service struct {
-	db *sql.DB
+	db     *sql.DB
+	stripe StripeConfig
 }
 
 func New(db *sql.DB) *Service { return &Service{db: db} }
+
+// WithStripe configures Stripe-backed checkout/portal/webhook handling.
+func (s *Service) WithStripe(cfg StripeConfig) *Service {
+	s.stripe = cfg
+	return s
+}
 
 // Summary is the authenticated user's current billing view.
 type Summary struct {

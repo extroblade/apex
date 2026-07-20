@@ -54,3 +54,22 @@ export function useSetDevTier() {
     },
   });
 }
+
+export function useStartCheckout() {
+  return useMutation({
+    mutationFn: (plan: 'pro' = 'pro') =>
+      apiFetch<{ url: string }>('/api/billing/checkout', {
+        method: 'POST',
+        body: JSON.stringify({ plan }),
+      }),
+  });
+}
+
+export function useStartPortal() {
+  return useMutation({
+    mutationFn: () =>
+      apiFetch<{ url: string }>('/api/billing/portal', {
+        method: 'POST',
+      }),
+  });
+}

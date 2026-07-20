@@ -53,7 +53,14 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 	h.Setups = setups.New(db)
 	h.Goals = goals.New(db)
 	h.Locales = locales.New(db)
-	h.Subscription = subscription.New(db)
+	h.Subscription = subscription.New(db).WithStripe(subscription.StripeConfig{
+		SecretKey:     cfg.StripeSecretKey,
+		WebhookSecret: cfg.StripeWebhookSecret,
+		ProPriceID:    cfg.StripeProPriceID,
+		SuccessURL:    cfg.StripeSuccessURL,
+		CancelURL:     cfg.StripeCancelURL,
+		PortalReturn:  cfg.StripePortalReturn,
+	})
 	h.Cache = redisCache
 	h.DeveloperKey = cfg.DeveloperKey
 
@@ -140,9 +147,12 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 
 		// Billing API (Variant A foundation): public plans + caller subscription.
 		r.Get("/billing/plans", h.BillingPlans)
+		r.Post("/billing/webhook", h.StripeWebhook)
 		r.Route("/billing", func(r chi.Router) {
 			r.Use(middleware.RequireAuth)
 			r.Get("/subscription", h.MySubscription)
+			r.Post("/checkout", h.BillingCheckout)
+			r.Post("/portal", h.BillingPortal)
 			// Temporary dev-only tier switch until Stripe checkout/webhooks are wired.
 			r.Put("/dev/tier", h.DevSetTier)
 		})

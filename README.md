@@ -178,8 +178,13 @@ Tip: `docker compose up db` to run just MySQL while developing the apps natively
 | GET    | `/api/planner/{cars,tracks,series}` | user | Catalog with owned/favorite flags |
 | PUT    | `/api/planner/{cars,tracks}/{id}` | user | Toggle owned (`{"owned":bool}`) |
 | PUT    | `/api/planner/series/{id}` | user | Toggle favorite (`{"favorite":bool}`) |
+| GET    | `/api/billing/plans` | — | Public Free/Pro packaging |
+| POST   | `/api/billing/webhook` | Stripe | Billing webhook ingress (signature-verified) |
+| GET    | `/api/billing/subscription` | user | Current subscription/tier summary |
+| POST   | `/api/billing/checkout` | user | Create Stripe Checkout session URL |
+| POST   | `/api/billing/portal` | user | Create Stripe Billing Portal session URL |
 | POST   | `/api/setups/generate` | user | Deterministic baseline setup for a car+track |
-| POST   | `/api/setups/generate/pack` | user | A pack of setups: skill (safe/pro) × session (endurance/race/qual/rain) |
+| POST   | `/api/setups/generate/pack` | user + Pro | A pack of setups: skill (safe/pro) × session (endurance/race/qual/rain) |
 | GET/POST/DELETE | `/api/planner/plan[/{id}]` | user | Manual plan rows (series/track/car) |
 | GET    | `/api/drivers/search?q=` | user | Driver search (via your own linked session) |
 | GET    | `/api/drivers/{custId}` | user | Any driver's profile (cached 6h) |
@@ -197,7 +202,8 @@ bytes), `IRACING_CLIENT_ID`, `IRACING_OAUTH_REDIRECT_URI` (and
 
 Other env: `REDIS_ADDR` (e.g. `redis:6379`; empty = cache disabled, fail-open)
 and `CATALOG_IMAGE_DIR` (scheduler; the shared media-volume root, `/media-data`
-in Docker) — see `backend/.env.example`.
+in Docker), plus Stripe billing env (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+`STRIPE_PRO_PRICE_ID`, success/cancel/portal URLs) — see `backend/.env.example`.
 
 ## Menu (nav service)
 

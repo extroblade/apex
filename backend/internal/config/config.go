@@ -51,6 +51,13 @@ type Config struct {
 	// emails (e.g. "https://apex.app"). Defaults to http://localhost:3000 for
 	// local dev so the links land on the dev frontend.
 	AppBaseURL string
+	// Stripe billing settings for Variant A subscriptions.
+	StripeSecretKey     string
+	StripeWebhookSecret string
+	StripeProPriceID    string
+	StripeSuccessURL    string
+	StripeCancelURL     string
+	StripePortalReturn  string
 }
 
 // Load reads configuration from the environment, applying sensible defaults.
@@ -79,6 +86,12 @@ func Load() *Config {
 		SMTPPassword:        env("SMTP_PASSWORD", ""),
 		SMTPFrom:            env("SMTP_FROM", ""),
 		AppBaseURL:          env("APP_BASE_URL", "http://localhost:3000"),
+		StripeSecretKey:     env("STRIPE_SECRET_KEY", ""),
+		StripeWebhookSecret: env("STRIPE_WEBHOOK_SECRET", ""),
+		StripeProPriceID:    env("STRIPE_PRO_PRICE_ID", ""),
+		StripeSuccessURL:    env("STRIPE_SUCCESS_URL", "http://localhost:3000/upgrade?checkout=success"),
+		StripeCancelURL:     env("STRIPE_CANCEL_URL", "http://localhost:3000/upgrade?checkout=cancel"),
+		StripePortalReturn:  env("STRIPE_PORTAL_RETURN_URL", "http://localhost:3000/upgrade"),
 	}
 	if cfg.DeveloperKey == "3" {
 		// The compose default is a convenience for local dev, but it's a known

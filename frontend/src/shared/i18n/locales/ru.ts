@@ -326,6 +326,8 @@ export const ru: Translation = {
     proName: 'Pro',
     currentPlanButton: 'Текущий тариф',
     loginToUpgrade: 'Войдите, чтобы обновить тариф',
+    startCheckout: 'Перейти к оплате',
+    manageBilling: 'Управление подпиской',
     checkoutSoon: 'Оплата скоро появится',
     devActivatePro: 'Активировать Pro (developer)',
     devSwitchFree: 'Переключить на Free (developer)',

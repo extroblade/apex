@@ -1,7 +1,13 @@
 import { Link } from 'wouter';
 
 import { useViewer } from '@/entities/viewer';
-import { useBillingPlans, useSetDevTier, useSubscription } from '@/entities/subscription';
+import {
+  useBillingPlans,
+  useSetDevTier,
+  useStartCheckout,
+  useStartPortal,
+  useSubscription,
+} from '@/entities/subscription';
 import { isDev } from '@/shared/lib/dev';
 import { useTranslation } from '@/shared/i18n';
 import { Button } from '@/shared/ui/button';
@@ -14,6 +20,8 @@ export function UpgradePage() {
   const plans = useBillingPlans();
   const subscription = useSubscription(Boolean(viewer));
   const setTier = useSetDevTier();
+  const checkout = useStartCheckout();
+  const portal = useStartPortal();
   const dev = Boolean(isDev());
 
   if (viewerLoading) return null;
@@ -62,10 +70,35 @@ export function UpgradePage() {
                     <Link href="/login">{t('billing.loginToUpgrade')}</Link>
                   </Button>
                 ) : isCurrent ? (
-                  <Button disabled>{t('billing.currentPlanButton')}</Button>
+                  isPro ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={portal.isPending}
+                      onClick={() =>
+                        portal.mutate(undefined, {
+                          onSuccess: ({ url }) => window.location.assign(url),
+                        })
+                      }
+                    >
+                      {portal.isPending ? t('common.loading') : t('billing.manageBilling')}
+                    </Button>
+                  ) : (
+                    <Button disabled>{t('billing.currentPlanButton')}</Button>
+                  )
                 ) : isPro ? (
                   <div className="space-y-2">
-                    <Button disabled>{t('billing.checkoutSoon')}</Button>
+                    <Button
+                      type="button"
+                      disabled={checkout.isPending}
+                      onClick={() =>
+                        checkout.mutate('pro', {
+                          onSuccess: ({ url }) => window.location.assign(url),
+                        })
+                      }
+                    >
+                      {checkout.isPending ? t('common.loading') : t('billing.startCheckout')}
+                    </Button>
                     {dev && (
                       <Button
                         type="button"
@@ -99,6 +132,10 @@ export function UpgradePage() {
       {subscription.error && (
         <p className="text-sm text-destructive">{(subscription.error as Error).message}</p>
       )}
+      {checkout.error && (
+        <p className="text-sm text-destructive">{(checkout.error as Error).message}</p>
+      )}
+      {portal.error && <p className="text-sm text-destructive">{(portal.error as Error).message}</p>}
     </div>
   );
 }

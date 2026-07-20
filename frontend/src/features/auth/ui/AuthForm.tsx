@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -102,6 +102,17 @@ export function AuthForm() {
                 ? t('auth.logIn')
                 : t('auth.signUp')}
           </Button>
+
+          {mode === 'login' && (
+            <p className="text-center text-sm">
+              <Link
+                href="/reset-password"
+                className="text-muted-foreground underline underline-offset-4 hover:text-foreground"
+              >
+                {t('auth.forgotPassword')}
+              </Link>
+            </p>
+          )}
         </form>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">

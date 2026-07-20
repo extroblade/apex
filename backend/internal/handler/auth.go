@@ -138,6 +138,89 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// RequestPasswordReset starts the reset flow: given an email, it issues a
+// reset token and emails a link. Always 204 — never reveals whether the email
+// belongs to an account (no enumeration).
+func (h *Handler) RequestPasswordReset(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Email string `json:"email"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, errBody("invalid JSON body"))
+		return
+	}
+	_ = h.Auth.RequestPasswordReset(r.Context(), req.Email)
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// ConfirmPasswordReset consumes the reset token and sets the new password.
+func (h *Handler) ConfirmPasswordReset(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Token       string `json:"token"`
+		NewPassword string `json:"newPassword"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, errBody("invalid JSON body"))
+		return
+	}
+	if err := h.Auth.ConfirmPasswordReset(r.Context(), req.Token, req.NewPassword); err != nil {
+		writeJSON(w, recoveryStatus(err), errBody(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// RequestEmailVerification starts the verification flow for an email (used by
+// the pre-login "resend" form). Always 204 — no enumeration.
+func (h *Handler) RequestEmailVerification(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Email string `json:"email"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, errBody("invalid JSON body"))
+		return
+	}
+	_ = h.Auth.RequestEmailVerification(r.Context(), req.Email)
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// ConfirmEmailVerification consumes the verify token (clicked from the email).
+// Returns 204 on success so the SPA can show a "verified" state without parsing
+// the body.
+func (h *Handler) ConfirmEmailVerification(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		writeJSON(w, http.StatusBadRequest, errBody("missing token"))
+		return
+	}
+	if err := h.Auth.ConfirmEmailVerification(r.Context(), token); err != nil {
+		writeJSON(w, recoveryStatus(err), errBody(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// ResendEmailVerification re-issues and emails the verification token for the
+// logged-in user. Used by the "verify your email" banner on the profile page.
+func (h *Handler) ResendEmailVerification(w http.ResponseWriter, r *http.Request) {
+	user, _ := auth.UserFromContext(r.Context())
+	_ = h.Auth.RequestEmailVerification(r.Context(), user.Email)
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// recoveryStatus maps the recovery/verification errors to HTTP status codes.
+// ErrTokenInvalid → 400 (bad input, not a server fault); ErrWeakPassword → 422.
+func recoveryStatus(err error) int {
+	switch {
+	case errors.Is(err, auth.ErrTokenInvalid):
+		return http.StatusBadRequest
+	case errors.Is(err, auth.ErrWeakPassword):
+		return http.StatusUnprocessableEntity
+	default:
+		return http.StatusInternalServerError
+	}
+}
+
 // authStatus maps auth errors to HTTP status codes.
 func authStatus(err error) int {
 	switch {

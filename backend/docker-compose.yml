@@ -67,6 +67,17 @@ services:
       # SECURITY: "3" is a convenience default — anyone who knows it can toggle
       # your feature flags. Override DEVELOPER_KEY for any public deploy.
       DEVELOPER_KEY: "${DEVELOPER_KEY:-3}"
+      # Transactional email (password reset, email verification). Empty
+      # SMTP_HOST disables the mailer — the flows still run but no mail is
+      # delivered. For local dev, run Mailpit on 1025 and set SMTP_HOST=mailpit
+      # SMTP_PORT=1025. Production: point at your transactional provider.
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
+      SMTP_FROM: "${SMTP_FROM:-Apex <no-reply@apex.app>}"
+      # Public origin used to build links in transactional emails.
+      APP_BASE_URL: "${APP_BASE_URL:-http://localhost:3000}"
       # Encrypts stored iRacing refresh tokens at rest (AES-256-GCM). Empty =
       # iRacing linking stays disabled (it's flag-gated off anyway). NEVER commit
       # a real key — set it in a gitignored .env: head -c 32 /dev/urandom | base64

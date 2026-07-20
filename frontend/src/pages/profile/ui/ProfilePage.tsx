@@ -4,6 +4,8 @@ import { useViewer } from '@/entities/viewer';
 import { useTranslation } from '@/shared/i18n';
 import { ProfileSettings } from '@/features/profile';
 import { ThemeConfigurator } from '@/features/customize-theme';
+import { VerifyEmailBanner } from '@/features/auth';
+import { AccountLifecycle } from '@/features/account-lifecycle';
 import { Button } from '@/shared/ui/button';
 import {
   Card,
@@ -41,8 +43,10 @@ export function ProfilePage() {
         <h1 className="text-2xl font-semibold">{t('profile.title')}</h1>
         <p className="text-sm text-muted-foreground">{t('profile.subtitle')}</p>
       </div>
+      <VerifyEmailBanner />
       <ProfileSettings />
       <ThemeConfigurator />
+      <AccountLifecycle />
     </div>
   );
 }

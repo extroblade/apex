@@ -18,6 +18,7 @@ import (
 	"apex/internal/handler"
 	"apex/internal/iracing"
 	"apex/internal/locales"
+	"apex/internal/mail"
 	"apex/internal/metrics"
 	"apex/internal/middleware"
 	"apex/internal/racing"
@@ -30,7 +31,15 @@ const iracingFlag = "iracing_oauth"
 
 // New builds the application's HTTP router with all routes and middleware.
 func New(cfg *config.Config, db *sql.DB) http.Handler {
-	authSvc := auth.NewService(db)
+	authSvc := auth.NewService(db).WithMailer(
+		mail.New(mail.Config{
+			Host: cfg.SMTPHost, Port: cfg.SMTPPort, User: cfg.SMTPUser, Pass: cfg.SMTPPassword, From: cfg.SMTPFrom,
+		}),
+		cfg.AppBaseURL,
+	)
+	if cfg.SMTPHost == "" {
+		log.Printf("mail: SMTP_HOST empty — transactional email disabled (password reset / email verification will not deliver)")
+	}
 	// Redis cache is fail-open: an empty REDIS_ADDR (or a downed Redis) just
 	// means every read falls through to the DB.
 	redisCache := cache.New(cfg.RedisAddr)
@@ -57,6 +66,13 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 	r.Use(metrics.Middleware)
 	r.Use(middleware.CORS(cfg.CORSOrigin))
 	r.Use(middleware.Auth(authSvc))
+
+	// Cap request bodies so a single request can't stream an unbounded amount
+	// of data into json.Decode (DoS). 1 MiB comfortably covers the largest
+	// legitimate payload — the avatar data URL (~900 KiB cap) plus JSON
+	// overhead — while still rejecting anything bigger. Must be registered
+	// before any r.Handle/r.Route call — chi panics if Use follows a route.
+	r.Use(middleware.MaxBody(1 << 20)) // 1 MiB
 
 	// Prometheus exposition. At the root (not under /api) and not proxied by the
 	// frontend nginx, so it's only reachable inside apex-net for scraping.
@@ -89,6 +105,13 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 				}
 				r.Post("/register", h.Register)
 				r.Post("/login", h.Login)
+				// Password reset + email verification share the credential
+				// rate limit — they're the email-driven entry points an
+				// attacker would spam to enumerate or flood mailboxes.
+				r.Post("/password-reset/request", h.RequestPasswordReset)
+				r.Post("/password-reset/confirm", h.ConfirmPasswordReset)
+				r.Post("/verify-email/request", h.RequestEmailVerification)
+				r.Get("/verify-email", h.ConfirmEmailVerification)
 			})
 			r.Post("/logout", h.Logout)
 			r.Get("/me", h.Me)
@@ -98,6 +121,16 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 				r.Patch("/profile", h.UpdateProfile)
 				r.Put("/avatar", h.UpdateAvatar)
 				r.Post("/password", h.ChangePassword)
+				r.Post("/verify-email/resend", h.ResendEmailVerification)
+
+				// Account lifecycle: data export (GDPR), delete account,
+				// password-confirmed email change with verification.
+				r.Route("/account", func(r chi.Router) {
+					r.Get("/export", h.ExportData)
+					r.Delete("/", h.DeleteAccount)
+					r.Post("/email", h.RequestEmailChange)
+					r.Delete("/email", h.CancelEmailChange)
+				})
 			})
 		})
 

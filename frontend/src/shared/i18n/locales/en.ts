@@ -53,6 +53,24 @@ export const en = {
     haveAccount: 'Already have an account? ',
     invalidEmail: 'Enter a valid email address.',
     passwordTooShort: 'Password must be at least 8 characters.',
+    forgotPassword: 'Forgot password?',
+    resetTitle: 'Reset password',
+    resetSubtitle: 'We’ll email you a link to set a new password.',
+    resetSend: 'Send reset link',
+    resetSent: 'If that email has an account, a reset link is on its way.',
+    resetConfirmTitle: 'Set a new password',
+    resetConfirmSubtitle: 'Choose a new password for your account.',
+    resetConfirmButton: 'Reset password',
+    resetConfirmDone: 'Password reset. You can now log in.',
+    resetTokenMissing: 'This reset link is invalid or has expired. Request a new one.',
+    verifyTitle: 'Verify your email',
+    verifySubtitle: 'Confirming your email address…',
+    verifyDone: 'Email verified. Thank you!',
+    verifyFailed: 'This verification link is invalid or has expired.',
+    verifyBanner: 'Your email isn’t verified yet.',
+    verifyBannerHint: 'Some features are gated until you confirm it.',
+    verifyResend: 'Resend verification email',
+    verifyResent: 'Verification email sent. Check your inbox.',
   },
   profile: {
     title: 'Profile',
@@ -74,6 +92,30 @@ export const en = {
     imageTooLarge: 'Image is too large (max ~0.5 MB).',
     signInRequired: 'Sign in required',
     signInToManage: 'Log in to manage your profile.',
+    changeEmail: 'Change email',
+    changeEmailHint:
+      'We’ll send a verification link to the new address. Your current email stays active until you confirm.',
+    newEmail: 'New email',
+    requestEmailChange: 'Send verification link',
+    emailChangeRequested: 'Verification link sent. Check the new inbox.',
+    emailChangePending: 'Email change pending for {{email}}.',
+    cancelEmailChange: 'Cancel email change',
+    emailChangeCanceled: 'Email change canceled.',
+    dataExport: 'Your data',
+    dataExportHint:
+      'Download a JSON file with everything we store about your account (profile, garage, plans, setups, goals).',
+    exportData: 'Download my data',
+    exportFailed: 'Export failed. Please try again.',
+    dangerZone: 'Danger zone',
+    dangerZoneHint:
+      'Deleting your account is permanent and cannot be undone. All your data is removed.',
+    deleteAccount: 'Delete account',
+    deleteAccountConfirmTitle: 'Delete your account?',
+    deleteAccountConfirmBody:
+      'This permanently deletes your account and everything in it — garage, plans, setups, goals. This cannot be undone. Type your password to confirm.',
+    deleteAccountConfirm: 'Delete permanently',
+    deleteAccountPasswordLabel: 'Your password',
+    deleteAccountSuccess: 'Account deleted. Sorry to see you go.',
   },
   themeConfig: {
     title: 'Custom theme',
@@ -263,6 +305,90 @@ export const en = {
     about: 'About',
     terms: 'Terms',
     privacy: 'Privacy',
+  },
+  about: {
+    title: 'About Apex',
+    p1: 'Apex is a companion app for sim racers. It helps you plan and get faster: a fuel & stint calculator, a setup generator, a full season planner, your garage, and season goals — in one place.',
+    p2: 'The core tools work without linking any external account. Apex is an independent project and is not affiliated with, endorsed by, or sponsored by iRacing.com Motorsport Simulations, LLC.',
+  },
+  legal: {
+    updated: 'Last updated: {{date}}',
+    terms: {
+      title: 'Terms of Service',
+      updated: 'July 2026',
+      intro:
+        'These Terms govern your use of Apex (the "Service"). By creating an account or using the Service you agree to them. If you do not agree, do not use the Service.',
+      service: {
+        h: 'The Service',
+        b: 'Apex is a companion app for sim racers: a fuel & stint calculator, setup generator, season planner, garage, and goal tracking. Some features are offered on a free tier and others as part of a paid subscription.',
+      },
+      accounts: {
+        h: 'Accounts',
+        b: 'You are responsible for the activity under your account and for keeping your password confidential. Provide accurate information and notify us of any unauthorized use. You must be old enough to form a binding contract in your jurisdiction.',
+      },
+      content: {
+        h: 'Your content',
+        b: 'You retain ownership of the setups, goals, plans, and other content you create. By marking content as public (e.g. publishing a setup to the showroom) you grant us a non-exclusive license to host and display it to other users. You are responsible for the content you upload.',
+      },
+      acceptable: {
+        h: 'Acceptable use',
+        b: "Do not misuse the Service: no unlawful activity, no attempts to break, overload, or reverse-engineer it, and no infringement of others' rights.",
+      },
+      thirdParty: {
+        h: 'Third-party platforms',
+        b: 'Apex is an independent project and is not affiliated with, endorsed by, or sponsored by iRacing.com Motorsport Simulations, LLC. Any third-party names are used only to describe compatibility.',
+      },
+      subscriptions: {
+        h: 'Subscriptions',
+        b: 'Paid plans renew until cancelled. Prices and included features may change; we will give notice of material changes. Except where required by law, fees already paid are non-refundable.',
+      },
+      warranty: {
+        h: 'No warranty & liability',
+        b: 'The Service is provided "as is", without warranties of any kind. To the maximum extent permitted by law, we are not liable for indirect or consequential damages, and our total liability is limited to the amount you paid in the twelve months before the claim.',
+      },
+      changes: {
+        h: 'Changes & contact',
+        b: 'We may update these Terms; continued use after changes means you accept them. Questions? Contact us at the support address listed on our site.',
+      },
+    },
+    privacy: {
+      title: 'Privacy Policy',
+      updated: 'July 2026',
+      intro:
+        'This policy explains what data Apex collects, why, and your choices. We aim to collect only what the Service needs to work.',
+      collect: {
+        h: 'What we collect',
+        b: 'Account: your email address and a securely hashed password. Your content: setups, goals, race plans, and garage selections you create. Technical: basic request logs (e.g. IP address, timestamps) needed for security and reliability.',
+      },
+      why: {
+        h: 'Why we use it',
+        b: 'To provide the Service (authenticate you, store your work), to keep it secure (rate limiting, abuse prevention), and — for subscribers — to manage billing.',
+      },
+      cookies: {
+        h: 'Cookies',
+        b: 'We use a single essential cookie to keep you signed in. If product analytics are enabled, an analytics provider (e.g. Yandex Metrica) may set its own cookies; analytics are off unless configured.',
+      },
+      thirdParties: {
+        h: 'Third parties',
+        b: 'Catalog reference data may be sourced from third parties; we do not sell your personal data. When you link an external account (e.g. iRacing via its official API), we access only what you authorize.',
+      },
+      retention: {
+        h: 'Retention',
+        b: 'We keep your data while your account is active. You can request deletion, and we remove your account and associated content, except where we must retain records to comply with law.',
+      },
+      rights: {
+        h: 'Your rights',
+        b: 'Subject to your jurisdiction, you may request access to, correction of, export of, or deletion of your personal data. Contact us to exercise these rights.',
+      },
+      security: {
+        h: 'Security',
+        b: 'Passwords are hashed, sessions are token-based and revoked on password change, and any linked third-party credentials are encrypted at rest. No system is perfectly secure, but we take reasonable measures to protect your data.',
+      },
+      changes: {
+        h: 'Changes & contact',
+        b: 'We may update this policy and will note the date above. Questions or requests? Contact us at the support address listed on our site.',
+      },
+    },
   },
 };
 

@@ -20,6 +20,11 @@ export interface CatalogRow {
   badge?: string; // e.g. required license class for a series
   layouts?: TrackLayout[]; // for tracks: the configs grouped under this row
   checked: boolean;
+  // `disabled` freezes the row (checked + read-only) — used for free content,
+  // which everyone has and can't be "unowned".
+  disabled?: boolean;
+  // `free` flags the row for a "Free" badge so the read-only state is clear.
+  free?: boolean;
 }
 
 export function CatalogList({
@@ -163,11 +168,17 @@ function Row({
   return (
     <div className="flex items-center gap-3 border-b py-2 last:border-0">
       <CatalogThumbnail category={row.category} name={row.name} className="size-9" />
-      <label className="flex flex-1 cursor-pointer items-center gap-3">
+      <label
+        className={cn(
+          'flex flex-1 items-center gap-3',
+          row.disabled ? 'cursor-default' : 'cursor-pointer',
+        )}
+      >
         <input
           type="checkbox"
-          className="size-4 cursor-pointer"
+          className="size-4 cursor-pointer disabled:cursor-default disabled:opacity-60"
           checked={row.checked}
+          disabled={row.disabled}
           onChange={(e) => onToggle(row.id, e.target.checked)}
         />
         <span className="text-sm">
@@ -175,6 +186,11 @@ function Row({
           {row.sub && <span className="text-muted-foreground"> · {row.sub}</span>}
         </span>
       </label>
+      {row.free && (
+        <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+          Free
+        </Badge>
+      )}
       {row.badge && <Badge>{row.badge}</Badge>}
       {row.layouts && row.layouts.length > 1 && (
         <Badge className="tabular-nums" title={`${row.layouts.length} layouts`}>

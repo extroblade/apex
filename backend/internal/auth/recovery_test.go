@@ -63,7 +63,7 @@ func TestRequestPasswordReset_KnownEmailSendsLink(t *testing.T) {
 		WithArgs(int64(42), "reset").
 		WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectExec("INSERT INTO email_tokens").
-		WithArgs(sqlmock.AnyArg(), int64(42), "reset", sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), int64(42), "reset", sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
 
@@ -87,7 +87,7 @@ func TestRequestPasswordReset_KnownEmailSendsLink(t *testing.T) {
 func TestConfirmPasswordReset_BadToken(t *testing.T) {
 	db, mock, _ := sqlmock.New()
 	defer db.Close()
-	mock.ExpectQuery("SELECT user_id, expires_at FROM email_tokens").
+	mock.ExpectQuery("SELECT user_id, expires_at, target_email FROM email_tokens").
 		WithArgs(sqlmock.AnyArg(), "reset").
 		WillReturnError(sql.ErrNoRows)
 
@@ -104,10 +104,10 @@ func TestConfirmPasswordReset_ValidTokenUpdatesAndRevokes(t *testing.T) {
 	db, mock, _ := sqlmock.New()
 	defer db.Close()
 
-	mock.ExpectQuery("SELECT user_id, expires_at FROM email_tokens").
+	mock.ExpectQuery("SELECT user_id, expires_at, target_email FROM email_tokens").
 		WithArgs(sqlmock.AnyArg(), "reset").
-		WillReturnRows(sqlmock.NewRows([]string{"user_id", "expires_at"}).
-			AddRow(42, time.Now().Add(24*time.Hour)))
+		WillReturnRows(sqlmock.NewRows([]string{"user_id", "expires_at", "target_email"}).
+			AddRow(42, time.Now().Add(24*time.Hour), ""))
 	mock.ExpectExec("DELETE FROM email_tokens WHERE token_hash = \\? AND kind = \\?").
 		WithArgs(sqlmock.AnyArg(), "reset").
 		WillReturnResult(sqlmock.NewResult(0, 1))
@@ -163,16 +163,18 @@ func TestRequestEmailVerification_AlreadyVerifiedNoOp(t *testing.T) {
 func TestConfirmEmailVerification_MarksVerified(t *testing.T) {
 	db, mock, _ := sqlmock.New()
 	defer db.Close()
-	mock.ExpectQuery("SELECT user_id, expires_at FROM email_tokens").
+	mock.ExpectQuery("SELECT user_id, expires_at, target_email FROM email_tokens").
 		WithArgs(sqlmock.AnyArg(), "verify").
-		WillReturnRows(sqlmock.NewRows([]string{"user_id", "expires_at"}).
-			AddRow(42, time.Now().Add(24*time.Hour)))
+		WillReturnRows(sqlmock.NewRows([]string{"user_id", "expires_at", "target_email"}).
+			AddRow(42, time.Now().Add(24*time.Hour), ""))
 	mock.ExpectExec("DELETE FROM email_tokens WHERE token_hash = \\? AND kind = \\?").
 		WithArgs(sqlmock.AnyArg(), "verify").
 		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectBegin()
 	mock.ExpectExec("UPDATE users SET email_verified = 1 WHERE id = \\?").
 		WithArgs(int64(42)).
 		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
 
 	s := &Service{db: db}
 	if err := s.ConfirmEmailVerification(context.Background(), "valid-token"); err != nil {

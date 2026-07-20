@@ -121,6 +121,16 @@ func New(cfg *config.Config, db *sql.DB) http.Handler {
 				r.Put("/avatar", h.UpdateAvatar)
 				r.Post("/password", h.ChangePassword)
 				r.Post("/verify-email/resend", h.ResendEmailVerification)
+
+				// Account lifecycle: data export (GDPR), delete account,
+				// password-confirmed email change with verification.
+				r.Route("/account", func(r chi.Router) {
+					r.Get("/export", h.ExportData)
+					r.Delete("/", h.DeleteAccount)
+					r.Post("/email", h.RequestEmailChange)
+					r.Delete("/email", h.CancelEmailChange)
+					r.Get("/pending-email", h.PendingEmail)
+				})
 			})
 		})
 
